@@ -14,7 +14,7 @@ Launch the Terminal and type the following command string:
 xcode-select --install
 ```
 
-Use `cd` to the directory of your openFramewroks project and run:
+Use `cd` to the directory of your project and run:
 
 ```
 make
