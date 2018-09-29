@@ -8,13 +8,13 @@ An immersive theater project that explores people chasing American dream and the
 
 openFramewroks has troubles with being compiled by [Xcode 10](https://forum.openframeworks.cc/t/xcode-10-0-build-errors/30447/6) and getting access to camera in macOS 10.4 Mojave. The simplest solution is Removing Xcode and only using Command Line Tools to compile and run projects.
 
-Launch the Terminal and type the following command string
+Launch the Terminal and type the following command string:
 
 ```
 xcode-select --install
 ```
 
-Use `cd` to the directory of your openFramewroks project and run the following string
+Use `cd` to the directory of your openFramewroks project and run:
 
 ```
 make
