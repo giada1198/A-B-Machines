@@ -14,13 +14,13 @@ Launch the Terminal and type the following command string
 xcode-select --install
 ```
 
-### Install Addons
+### Install openFrameworks Addons
 
 #### ofxOpenPose
 
 [ofxOpenFace](https://github.com/antimodular/ofxOpenFace/tree/quick) is a toolkit wrapping [OpenFace](https://github.com/TadasBaltrusaitis/OpenFace). It's capable of facial landmark detection, head pose estimation, facial action unit recognition, and eye-gaze estimation.
 
-Use [homebrew](https://brew.sh) to install tbb, openblas and opencv:
+At first, use [homebrew](https://brew.sh) to install [TBB](https://www.threadingbuildingblocks.org/), openBlas and [openCV](https://opencv.orgGI):
 
 ```
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"; brew install tbb; brew install opencv; brew install openblas;
