@@ -6,7 +6,9 @@ An immersive theater project that explores people chasing American dream and the
 
 ### Install Command Line Tools in macOS without Xcode
 
-Openframewroks has troubles with being compiled by [Xcode 10](https://forum.openframeworks.cc/t/xcode-10-0-build-errors/30447/6) and getting access to camera in macOS 10.4 Mojave. The simplest solution is only install Command Line Tools and compile projects using built-in terminal.
+Openframewroks has troubles with being compiled by [Xcode 10](https://forum.openframeworks.cc/t/xcode-10-0-build-errors/30447/6) and getting access to camera in macOS 10.4 Mojave. The simplest solution is Removing Xcode and only using Command Line Tools to compile and run projects.
+
+Launch the Terminal and type the following command string
 
 ```
 xcode-select --install
