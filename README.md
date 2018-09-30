@@ -2,7 +2,7 @@
 
 An immersive theater project that explores people chasing American dream and their self-identity, inspired by Andy Warhol and his philosophy.
 
-![header](/img/header.jpg)
+![header](/img/header_andy.jpg)
 
 ## Folder Structure
 
