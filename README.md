@@ -2,9 +2,16 @@
 
 An immersive theater project that explores people chasing American dream and their self-identity, inspired by Andy Warhol and his philosophy.
 
+## Folder Structure
+
+* photobooth-controller
+* photobooth-screen
+* camera-switch
+* lip-sync
+
 ## Getting Started
 
-### Compile openFrameworks using Command Line Tools without Xcode
+### Compile openFrameworks without Xcode
 
 openFramewroks has troubles with being compiled by [Xcode 10](https://forum.openframeworks.cc/t/xcode-10-0-build-errors/30447/6) and getting access to camera in macOS 10.4 Mojave. The simplest solution is Removing Xcode and only using Command Line Tools to compile and run projects.
 
@@ -19,6 +26,23 @@ Use `cd` to the directory of your project and run:
 ```
 make
 ```
+
+After compiling is done, you can launch the application in `bin` or run:
+
+```
+make RunRelease
+```
+
+### Fix Camera Access
+
+Goto `Info.plist` file and added the privacy key below:
+
+```
+<key>NSCameraUsageDescription</key>
+<string>${PRODUCT_NAME} Camera Usage</string>
+```
+
+
 
 ### Install Addons
 
