@@ -39,6 +39,13 @@ After compiling is done, you can launch the application in `bin` or run:
 make RunRelease
 ```
 
+To activate debug mode, run:
+
+```
+make Debug
+make RunDebug
+```
+
 ### Fix Camera Access
 
 Right-click on the application and goto `Contents/Info.plist` file to add the privacy key within `<dict>` below:
