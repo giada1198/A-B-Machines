@@ -13,6 +13,10 @@ An immersive theater project that explores people chasing American dream and the
 
 ## Getting Started
 
+### Install openFrameworks
+
+Download the latest version from [Official Website](https://openframeworks.cc/download/) and do not setup any IDE.
+
 ### Install Command Line Tools
 
 openFramewroks seems have troubles with being compiled by [Xcode 10](https://forum.openframeworks.cc/t/xcode-10-0-build-errors/30447/6) and getting access to camera in [macOS 10.4 Mojave](https://www.apple.com/macos/mojave/). The simplest solution is removing Xcode and only using Command Line Tools to compile and run projects.
@@ -37,7 +41,7 @@ make RunRelease
 
 ### Fix Camera Access
 
-Right-click on the application and goto `Contents/Info.plist` file to add the privacy key with in `<dict>` below:
+Right-click on the application and goto `Contents/Info.plist` file to add the privacy key within `<dict>` below:
 
 ```
 <key>NSCameraUsageDescription</key>
