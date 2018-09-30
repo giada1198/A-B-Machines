@@ -42,6 +42,9 @@ Right-click on the application and goto `Contents/Info.plist` file to add the pr
 <string>${PRODUCT_NAME} Camera Usage</string>
 ```
 
+Launch the application, you can allow the it access to camera.
+
+![camera_access.png](/img/camera_access.png)
 
 
 ### Install Addons
