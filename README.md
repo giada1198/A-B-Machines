@@ -2,6 +2,8 @@
 
 An immersive theater project that explores people chasing American dream and their self-identity, inspired by Andy Warhol and his philosophy.
 
+![header](/img/header.jpg)
+
 ## Folder Structure
 
 * photobooth-controller
@@ -44,7 +46,7 @@ Right-click on the application and goto `Contents/Info.plist` file to add the pr
 
 Launch the application, and now you can allow the openFrameworks access to camera:
 
-![camera_access.png](/img/camera_access.png)
+![camera_access](/img/camera_access.png)
 
 
 ### Install Addons
