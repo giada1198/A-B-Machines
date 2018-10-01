@@ -17,14 +17,27 @@ An immersive theater project that explores people chasing American dream and the
 
 Download the latest version from [Official Website](https://openframeworks.cc/download/) and do not setup any IDE.
 
-### Install Command Line Tools
+### Compile using Xcode 10
 
-openFramewroks seems have troubles with being compiled by [Xcode 10](https://forum.openframeworks.cc/t/xcode-10-0-build-errors/30447/6) and getting access to camera in [macOS 10.4 Mojave](https://www.apple.com/macos/mojave/). The simplest solution is removing Xcode and only using Command Line Tools to compile and run projects.
+openFramewroks seems have troubles with being compiled by [Xcode 10](https://forum.openframeworks.cc/t/xcode-10-0-build-errors/30447/6) and getting access to camera in [macOS 10.4 Mojave](https://www.apple.com/macos/mojave/). 
+
+Goto `openFrameworks-Info.plist` file to add the privacy key named `NSCameraUsageDescription`.
+
+### Compile without Xcode
+
+Another solution is removing Xcode and only using Command Line Tools to compile and run projects.
 
 Launch the Terminal and type the following command string:
 
 ```
 xcode-select --install
+```
+
+Goto `openFrameworks-Info.plist` file to add the privacy key within `<dict>` below:
+
+```
+<key>NSCameraUsageDescription</key>
+<string>${PRODUCT_NAME} Camera Usage</string>
 ```
 
 Use `cd` to the directory of your project and run:
@@ -44,15 +57,6 @@ To activate debug mode, run:
 ```
 make Debug
 make RunDebug
-```
-
-### Fix Camera Access
-
-Right-click on the application and goto `Contents/Info.plist` file to add the privacy key within `<dict>` below:
-
-```
-<key>NSCameraUsageDescription</key>
-<string>${PRODUCT_NAME} Camera Usage</string>
 ```
 
 Launch the application, and now you can allow the openFrameworks access to camera:
