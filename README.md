@@ -76,9 +76,11 @@ At first, use [homebrew](https://brew.sh) to install [TBB](https://www.threading
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"; brew install tbb; brew install opencv; brew install openblas;
 ```
 
+Goto `/addons/ofxOpenFace/src` replace `return 1;` to `return;`
+
 #### Others
-* ofxCV
-* ofxVideoRecorder
+* [ofxCV](https://github.com/kylemcdonald/ofxCv)
+* [ofxVideoRecorder](https://github.com/timscaffidi/ofxVideoRecorder)
 
 
 
