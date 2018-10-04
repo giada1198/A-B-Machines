@@ -24,7 +24,7 @@ openFramewroks seems have troubles with being compiled by [Xcode 10](https://for
 * oepnFrameworks 10.0
 * Xcode 10.0
 
-In both the project and `openFrameworksLib.xcodeproj`, goto `Build Settings` and show `All` settings, then change **Architectures** to `Standard Architectures (64-bit Intel)` and remove `i386` from **Vaild Architectures**.
+In both the project and `openFrameworksLib.xcodeproj`, goto `Build Settings` and show `All` settings, then change **Architectures** to `Standard Architectures (64-bit Intel)` and remove `i386` from **Valid Architectures**.
 
 ![build_settings](/img/build_settings.png)
 
@@ -91,17 +91,13 @@ At first, use [homebrew](https://brew.sh) to install [TBB](https://www.threading
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"; brew install tbb; brew install opencv; brew install openblas;
 ```
 
-Goto `/addons/ofxOpenFace/src` replace `return 1;` to `return;`
+##### Fix Bugs
+
+Goto `/addons/ofxOpenFace/src` and edit `ofxOpenFaceSingle.h` and `ofxOpenFaceMulti.h`, Replacing `return 1` to `return`.
 
 #### Others
 * [ofxCV](https://github.com/kylemcdonald/ofxCv)
 * [ofxVideoRecorder](https://github.com/timscaffidi/ofxVideoRecorder)
-
-
-
-
-
-
 
 ## Media Design Team
 * **Giada Sun** - *Lead Media Design* - [Website](http://giadasun.com)
