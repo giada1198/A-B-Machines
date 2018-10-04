@@ -16,7 +16,7 @@ An immersive theater project that explores people chasing American dream and the
 
 Download the latest version from [Official Website](https://openframeworks.cc/download/) and do not setup any IDE.
 
-### Compile Project using Xcode 10
+### Compile openFrameworks using Xcode 10
 
 openFramewroks seems have troubles with being compiled by [Xcode 10](https://forum.openframeworks.cc/t/xcode-10-0-build-errors/30447/6) using default setting and getting access to camera in [macOS 10.4 Mojave](https://www.apple.com/macos/mojave/). You have to modify some settings manually.
 
@@ -26,9 +26,19 @@ openFramewroks seems have troubles with being compiled by [Xcode 10](https://for
 
 In both the project and `openFrameworksLib.xcodeproj`, goto `Build Settings` and show `All` settings, then change **Architectures** to `Standard Architectures (64-bit Intel)` and remove `i386` from **Vaild Architectures**.
 
-Goto `openFrameworks-Info.plist` file to add the privacy key named `NSCameraUsageDescription`.
+![build_settings](/img/build_settings.png)
 
-### Compile without Xcode
+Goto `openFrameworks-Info.plist` file to add the privacy key named `NSCameraUsageDescription`, and it will automatically be renamed `Privacy - Camera Usage Description`.
+
+![add_camera_access](/img/add_camera_access.png)
+
+If Xcode has troubles with finding out addons during compiling, use Project Generator to reload all the addons.
+
+Build the project. Once you the camera access permission pops out, you success.
+
+![camera_access](/img/camera_access.png)
+
+### Compile openFrameworks without Xcode
 
 Another solution is removing Xcode and only using Command Line Tools to compile and run projects.
 
