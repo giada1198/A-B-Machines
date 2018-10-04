@@ -93,7 +93,7 @@ At first, use [homebrew](https://brew.sh) to install [TBB](https://www.threading
 
 ##### Fix Bugs
 
-Goto `/addons/ofxOpenFace/src` and edit `ofxOpenFaceSingle.h` and `ofxOpenFaceMulti.h`, Replacing `return 1` to `return`.
+Goto `addons/ofxOpenFace/src` folder and edit `ofxOpenFaceSingle.h` and `ofxOpenFaceMulti.h`, replacing all `return 1` to `return`.
 
 #### Others
 * [ofxCV](https://github.com/kylemcdonald/ofxCv)
