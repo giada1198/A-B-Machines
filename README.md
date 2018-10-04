@@ -6,10 +6,9 @@ An immersive theater project that explores people chasing American dream and the
 
 ## Folder Structure
 
-* photobooth-controller
-* photobooth-screen
-* camera-switch
-* lip-sync
+* **photobooth-controller** - Arduino
+* **photobooth-screen** - openFrameworks
+* **lip-sync-prototype** - openFrameworks
 
 ## Getting Started
 
@@ -17,9 +16,15 @@ An immersive theater project that explores people chasing American dream and the
 
 Download the latest version from [Official Website](https://openframeworks.cc/download/) and do not setup any IDE.
 
-### Compile using Xcode 10
+### Compile Project using Xcode 10
 
-openFramewroks seems have troubles with being compiled by [Xcode 10](https://forum.openframeworks.cc/t/xcode-10-0-build-errors/30447/6) and getting access to camera in [macOS 10.4 Mojave](https://www.apple.com/macos/mojave/). 
+openFramewroks seems have troubles with being compiled by [Xcode 10](https://forum.openframeworks.cc/t/xcode-10-0-build-errors/30447/6) using default setting and getting access to camera in [macOS 10.4 Mojave](https://www.apple.com/macos/mojave/). You have to modify some settings manually.
+
+#### Environment
+* oepnFrameworks 10.0
+* Xcode 10.0
+
+In both the project and `openFrameworksLib.xcodeproj`, goto `Build Settings` and show `All` settings, then change **Architectures** to `Standard Architectures (64-bit Intel)` and remove `i386` from **Vaild Architectures**.
 
 Goto `openFrameworks-Info.plist` file to add the privacy key named `NSCameraUsageDescription`.
 
