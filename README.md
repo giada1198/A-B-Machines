@@ -48,20 +48,20 @@ Launch the Terminal and type the following command string:
 xcode-select --install
 ```
 
-Goto `openFrameworks-Info.plist` file to add the privacy key within `<dict>` below:
-
-```
-<key>NSCameraUsageDescription</key>
-<string>${PRODUCT_NAME} Camera Usage</string>
-```
-
 Use `cd` to the directory of your project and run:
 
 ```
 make
 ```
 
-After compiling is done, you can launch the application in `bin` or run:
+After compiling is done, in `bin` folder, right click the application you just compiled and select `Show Package Contents`. In `Contents` folder, goto `info.plist` file to add the privacy key within `<dict>` below:
+
+```
+<key>NSCameraUsageDescription</key>
+<string>${PRODUCT_NAME} Camera Usage</string>
+```
+
+Now you can launch the project by double clicking the application or run:
 
 ```
 make RunRelease
