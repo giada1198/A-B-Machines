@@ -1,4 +1,0 @@
-ofxGui
-ofxPoco
-ofxScreenSetup
-ofxVideoRecorder
