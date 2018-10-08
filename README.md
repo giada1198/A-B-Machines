@@ -28,13 +28,19 @@ In both the project and `openFrameworksLib.xcodeproj`, goto `Build Settings` and
 
 ![build_settings](/img/build_settings.png)
 
+Remove the two frameworks in `CoreOF.xcconfig`:
+
+```
+ -framework QuickTime -framework QTKit
+```
+
 Goto `openFrameworks-Info.plist` file to add the privacy key named `NSCameraUsageDescription`, and it will automatically be renamed `Privacy - Camera Usage Description`.
 
 ![add_camera_access](/img/add_camera_access.png)
 
 If Xcode has troubles with finding out addons during compiling, use Project Generator to reload all the addons.
 
-Build the project. Once you the camera access permission pops out, you success.
+Build the project. Once you the camera access permission pops out, you succeed.
 
 ![camera_access](/img/camera_access.png)
 
@@ -85,7 +91,7 @@ Launch the application, and now you can allow the openFrameworks access to camer
 
 [ofxOpenFace](https://github.com/antimodular/ofxOpenFace/tree/quick) is a toolkit wrapping [OpenFace](https://github.com/TadasBaltrusaitis/OpenFace). It's capable of facial landmark detection, head pose estimation, facial action unit recognition, and eye-gaze estimation.
 
-At first, use [homebrew](https://brew.sh) to install [TBB](https://www.threadingbuildingblocks.org/), openBlas and [openCV](https://opencv.orgGI):
+First, use [homebrew](https://brew.sh) to install [TBB](https://www.threadingbuildingblocks.org/), openBlas and [openCV](https://opencv.orgGI):
 
 ```
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"; brew install tbb; brew install opencv; brew install openblas;
