@@ -31,7 +31,7 @@ In both the project and `openFrameworksLib.xcodeproj`, goto `Build Settings` and
 Remove the two frameworks in `CoreOF.xcconfig`:
 
 ```
- -framework QuickTime -framework QTKit
+-framework QuickTime -framework QTKit
 ```
 
 Goto `openFrameworks-Info.plist` file to add the privacy key named `NSCameraUsageDescription`, and it will automatically be renamed `Privacy - Camera Usage Description`.
