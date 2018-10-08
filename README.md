@@ -40,7 +40,7 @@ Goto `openFrameworks-Info.plist` file to add the privacy key named `NSCameraUsag
 
 If Xcode has troubles with finding out addons during compiling, use Project Generator to reload all the addons.
 
-Build the project. Once you the camera access permission pops out, you succeed.
+Build the project. Once the camera access permission poped out, you succeed.
 
 ![camera_access](/img/camera_access.png)
 
