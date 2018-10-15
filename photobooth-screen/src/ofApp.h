@@ -4,6 +4,7 @@
 #include "GuiApp.h"
 #include "ofxScreenSetup.h"
 #include "ofxVideoRecorder.h"
+#include "ofxSerial.h"
 
 class ofApp : public ofBaseApp{
 
@@ -29,7 +30,7 @@ class ofApp : public ofBaseApp{
 
         const bool singleCamera = true;
         int cameraAmount;
-        int cameraPositions[3][2] = { {0,0},{0,544},{960,544} };
+        const int cameraPositions[3][2] = { {0,0},{0,544},{960,544} };
 
         // Screen Setup
         ofxScreenSetup screenSetup;
@@ -45,7 +46,10 @@ class ofApp : public ofBaseApp{
 
         void recordingComplete(ofxVideoRecorderOutputFileCompleteEventArgs& args);
 
-
+    // Press Buttons
+    const int deviceQty = 1;
+    const int deviceNumber[3] = { 0, 1, 2 };
+    ofx::IO::SerialDevice device[10];
     
 //        ofFbo recordFbo;
 //        ofPixels recordPixels;

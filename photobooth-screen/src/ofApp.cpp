@@ -4,7 +4,10 @@
 void ofApp::setup(){
 	ofBackground(255);
 	ofSetCircleResolution(200);
-    screenSetup.setup(ofGetWidth(), ofGetHeight(), ofxScreenSetup::MONITOR_2);
+    if(!singleCamera)
+    {
+        screenSetup.setup(ofGetWidth(), ofGetHeight(), ofxScreenSetup::MONITOR_2);
+    }
     
     ofSetFrameRate(30);
     ofSetLogLevel(OF_LOG_VERBOSE);
@@ -26,17 +29,45 @@ void ofApp::setup(){
     vidGrabber[0].listDevices();
     int cameraSelction[3] = { 2, 1, 0 };
     
-    for (int i = 0; i < cameraAmount ; i++) {
+    for (int i = 0; i < cameraAmount ; i++)
+    {
         vidGrabber[i].setDeviceID(cameraSelction[i]);
         vidGrabber[i].initGrabber(960,544);
     }
-
+    
+    // Connect to Press Buttons
+    std::vector<ofx::IO::SerialDeviceInfo> devicesInfo = ofx::IO::SerialDeviceUtils::listDevices();
+    ofLogNotice("ofxSerial") << "Connected Devices: ";
+    for(int i = 0; i < devicesInfo.size(); i++)
+    {
+        ofLogNotice("ofxSerial") << devicesInfo[i];
+    }
+    if (!devicesInfo.empty())
+    {
+        for(int i = 0; i < deviceQty; i++)
+        {
+            bool success = device[i].setup(devicesInfo[deviceNumber[i]], 9600);
+            if(success)
+            {
+                ofLogNotice("ofxSerial") << "Successfully setup " << devicesInfo[deviceNumber[i]];
+            }
+            else
+            {
+                ofLogNotice("ofxSerial") << "Unable to setup " << devicesInfo[deviceNumber[i]];
+            }
+        }
+    }
+    else
+    {
+        ofLogNotice("ofxSerial") << "No devices connected.";
+    }
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
 
-    for (int i = 0; i < cameraAmount ; i++) {
+    for (int i = 0; i < cameraAmount ; i++)
+    {
         vidGrabber[i].update();
     }
 
@@ -46,12 +77,48 @@ void ofApp::update(){
             ofLogWarning("This frame was not added!");
         }
     }
+    
+    try
+    {
+        unsigned char buffer[1024]; // Read all bytes from the device;
+        for(int i = 0; i < deviceQty; i++)
+        {
+            while (device[i].available() > 0)
+            {
+                string str;
+                int sz = device[i].readBytes(buffer, 1024);
+                for (int i = 0; i < 7 ; ++i)
+                {
+                    str += buffer[i];
+                }
+                ofLogNotice("ofxSerial") << str;
+                if(str == to_string(i) + "_press")
+                {
+                    device[i].writeBytes(to_string(i) + "_blink\n");
+                }
+            }
+        }
+        
+        // Send some new bytes to the device to have them echo'd back.
+        //        std::string text = "Frame Number: " + ofToString(ofGetFrameNum());
+        //
+        //        ofx::IO::ByteBuffer textBuffer(text);
+        //
+        //        device.writeBytes(textBuffer);
+        //        device.writeByte('\n');
+    }
+    catch (const std::exception& exc)
+    {
+        ofLogError("ofApp::update") << exc.what();
+    }
+
 //    if (vidRecorder.hasVideoError()) {
 //        ofLogWarning("The video recorder failed to write some frames!");
 //    }
 //    if (vidRecorder.hasAudioError()) {
 //        ofLogWarning("The video recorder failed to write some audio samples!");
 //    }
+    
 }
 
 //--------------------------------------------------------------
@@ -65,10 +132,7 @@ void ofApp::draw(){
     for (int i = 0; i < cameraAmount ; i++) {
         vidGrabber[i].draw(cameraPositions[i][0], cameraPositions[i][1]);
     }
-    
-    
-    
-    
+
 //    stringstream ss;
 //    ss << "video queue size: " << vidRecorder.getVideoQueueSize() << endl
 //    << "audio queue size: " << vidRecorder.getAudioQueueSize() << endl
