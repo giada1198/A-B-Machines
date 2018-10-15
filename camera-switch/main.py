@@ -45,15 +45,20 @@ class Window(Frame):
 
         previousButton = Button(self, text='<', justify=CENTER, command=self.previousCue)
         previousButton.place(x=50, y=100)
-
         nextButton = Button(self, text='>', justify=CENTER, command=self.nextCue)
         nextButton.place(x=100, y=100)
+        gotoButton = Button(self, text='Goto', justify=CENTER, command=self.gotoCue)
+        gotoButton.place(x=175, y=100)
 
-        quitButton = Button(self, text='Goto', justify=CENTER)
-        quitButton.place(x=175, y=100)
+        self.gotoCueNumber = StringVar()
+        gotoEntry = Entry(self, textvariable=self.gotoCueNumber)
+        gotoEntry.place(x=235, y=100, width=125)
 
-        gotoInput = Entry(self)
-        gotoInput.place(x=235, y=100, width=125)
+        self.message = StringVar()
+        message = Message(self, textvariable=self.message, width=330)
+        message.config(bg='lightgreen')
+        message.place(x=35, y=145, height=30, )
+        self.message.set('[notice] please load the cue list file')
 
     def onOpen(self):
         ft = [('CSV files', '*.csv'), ('All files', '*')]
@@ -69,7 +74,9 @@ class Window(Frame):
         if self.cueListLength > 0:
             self.hasLoadedFile = True
             self.currentCue = 0
+            self.executeCue()
             self.updateCueText()
+            self.message.set('[notice] the cue list has been loaded')
         csvfile.closed
         return 112
 
@@ -89,6 +96,7 @@ class Window(Frame):
     def nextCue(self):
         if self.currentCue != self.cueListLength-1:
             self.currentCue += 1
+            self.executeCue()
             self.updateCueText()
             return True
         else: return False
@@ -96,14 +104,42 @@ class Window(Frame):
     def previousCue(self):
         if self.currentCue != 0:
             self.currentCue -= 1
+            self.executeCue()
             self.updateCueText()
             return True
         else: return False
 
+    def gotoCue(self):
+        cn = self.gotoCueNumber.get();
+        self.gotoCueNumber.set('')
+
+        for char in self.gotoCueNumber.get():
+            if char not in '1234567890.':
+                self.message.set('[notice] the cue number you entered is invalid')
+                return False
+
+        for i in range(self.cueListLength):
+            if cn == str(self.cueList[i][0]):
+                self.currentCue = i
+                self.executeCue()
+                self.updateCueText()
+                self.message.set('[action] goto cue ' + cn)
+                return True
+
+        self.message.set('[notice] the cue number you entered is invalid')
+        return False
+
+    def executeCue(self):
+        for i in range(1,9):
+            for output in str(self.cueList[self.currentCue][i]):
+                if output in '12345678':
+                    print('[serial] ' + '{' + str(i) + '@' + str(output) + '}')
+        return
+
 
 if __name__ == '__main__':
     root = Tk()
-    root.geometry("400x200")
+    root.geometry("400x200+100+100")
     root.resizable(width=False, height=False)
     app = Window(root)
     root.mainloop()
