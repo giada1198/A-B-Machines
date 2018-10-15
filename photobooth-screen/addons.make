@@ -1,0 +1,6 @@
+ofxGui
+ofxIO
+ofxPoco
+ofxScreenSetup
+ofxSerial
+ofxVideoRecorder
