@@ -2,7 +2,7 @@
 # python -m serial.tools.list_ports
 
 import csv, copy, os
-import serial
+# import serial
 from tkinter import *
 from tkinter import filedialog
 
@@ -134,7 +134,7 @@ class Window(Frame):
             for output in str(self.cueList[self.currentCue][i]):
                 if output in '12345678':
                     print('[serial] ' + '{' + str(i) + '@' + str(output) + '}')
-        return
+        return 112
 
 
 if __name__ == '__main__':
