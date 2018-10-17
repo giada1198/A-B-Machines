@@ -122,6 +122,19 @@ void ofApp::draw()
         {
             screenshot[i].draw(cameraPositions[i][0], cameraPositions[i][1]);
         }
+        ofEnableAlphaBlending();
+        
+        // Debug Mode
+        if(gui->isDebug)
+        {
+            ofSetColor(0,0,0,125);
+            ofDrawRectangle(cameraPositions[i][0], cameraPositions[i][1], 260, 75);
+            stringstream ss;
+            ss << "photo booth number: " << i << endl
+            << "fps: " << int(ofGetFrameRate()) << endl;
+            ofSetColor(255,255,255);
+            ofDrawBitmapString(ss.str(), cameraPositions[i][0]+20, cameraPositions[i][1]+20);
+        }
         
         // Draw Countdown Graphic
         if(isCountdown[i])
@@ -131,22 +144,25 @@ void ofApp::draw()
                 screenshot[i].draw(cameraPositions[i][0], cameraPositions[i][1]);
             }
             
-            ofEnableAlphaBlending();
+            
             float x = cdEndTime[i] - ofGetElapsedTimeMillis();
             
             if(x >= cdTimeLength-1000)
             {
-                ofSetColor(0,0,0,125);
-                ofDrawRectangle(cameraPositions[i][0], cameraPositions[i][1], 260, 75);
-                ofSetColor(255,255,255);
-                ofDrawBitmapString("Get Ready!", cameraPositions[i][0]+20, cameraPositions[i][1]+40);
+                if(gui->isDebug)
+                {
+                    ofSetColor(255,255,255);
+                    ofDrawBitmapString("Get Ready!", cameraPositions[i][0]+20, cameraPositions[i][1]+60);
+                }
             }
             else if(x > 1000)
             {
-                ofSetColor(0,0,0,125);
-                ofDrawRectangle(cameraPositions[i][0], cameraPositions[i][1], 260, 75);
-                ofSetColor(255,255,255);
-                ofDrawBitmapString(to_string(int(x/1000)), cameraPositions[i][0]+20, cameraPositions[i][1]+40);
+                if(gui->isDebug)
+                {
+                    ofSetColor(255,255,255);
+                    ofDrawBitmapString(to_string(int(x/1000)),
+                                       cameraPositions[i][0]+20, cameraPositions[i][1]+60);
+                }
             }
             else if(x >= 0)
             {
@@ -159,10 +175,11 @@ void ofApp::draw()
                     screenshot[i].save("screenshot.jpg");
                     hasShot[i] = true;
                 }
-                ofSetColor(0,0,0,125);
-                ofDrawRectangle(cameraPositions[i][0], cameraPositions[i][1], 260, 75);
-                ofSetColor(255,255,255);
-                ofDrawBitmapString("Shoot!", cameraPositions[i][0]+20, cameraPositions[i][1]+40);
+                if(gui->isDebug)
+                {
+                    ofSetColor(255,255,255);
+                    ofDrawBitmapString("Shoot!", cameraPositions[i][0]+20, cameraPositions[i][1]+60);
+                }
                 ofSetColor(255,255,255,(int(255*(1-abs(500-x)/500))));
                 ofDrawRectangle(cameraPositions[i][0], cameraPositions[i][1],
                                 cameraPositions[i][0] + cameraSizes[0],
@@ -173,25 +190,9 @@ void ofApp::draw()
                 isCountdown[i] = false;
                 hasShot[i] = false;
             }
-            ofDisableAlphaBlending();
         }
+        ofDisableAlphaBlending();
     }
-
-//    stringstream ss;
-//    ss << "video queue size: " << vidRecorder.getVideoQueueSize() << endl
-//    << "audio queue size: " << vidRecorder.getAudioQueueSize() << endl
-//    << "FPS: " << ofGetFrameRate() << endl
-//    << (bRecording?"pause":"start") << " recording: r" << endl
-//    << (bRecording?"close current video file: c":"") << endl;
-//    ofSetColor(0,0,0,100);
-//    ofDrawRectangle(0, 0, 260, 75);
-//    ofSetColor(255, 255, 255);
-//    ofDrawBitmapString(ss.str(),15,15);
-    
-//    ofSetColor(gui->color);
-//    ofDrawCircle(ofGetWidth()*0.5,ofGetHeight()*0.5,gui->radius);
-	ofSetColor(255,255,255);
-	ofDrawBitmapString(ofGetFrameRate(),20,20);
 }
 
 //--------------------------------------------------------------
