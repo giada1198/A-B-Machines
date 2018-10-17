@@ -1,23 +1,27 @@
 // =============================================================================
-// A/B MACHINES PHOTO BOOTH CONTROLLER 10/07/2018
+// A/B MACHINES PHOTO BOOTH CONTROLLER 10/17/2018
 // Giada Sun <syuanchs@andrew.cmu.edu>
 //
 // ## SETUP ##
 // 1. Tools > Board > Arduino Nano
 // 2. Tools > Processor > ATmega328P (Old Bootloader)
 // 3. Tools > Port > /dev/cu.usbserial
-// 4. Assign an UNIQUE number so the Mac is able to discren each controller
+// 4. Assign the photo booth number so the Mac is able to discren each controller
 // 5. Upload to Arduino
 // =============================================================================
 
-String SN = "0";
+
 int LED = 12;
 int BUTTON = 7;
+
+bool isDebug = false;
+int number = 1;
 
 String stage = "off";
 String input;
 bool isPress = false;
 int countdown = 0;
+unsigned long countdownTime;
 
 void setup()
 {
@@ -33,10 +37,21 @@ void loop()
   // Light Blinks
   if(stage == "blink")
   {
-    countdown -= 1;
-    if(countdown == 0)
+    if( millis() > countdownTime && countdown == 0)
     {
       stage = "off";
+      digitalWrite(LED, LOW);
+    }
+    else if( millis() > countdownTime && countdown%2 == 1 )
+    {
+      countdown -= 1;
+      countdownTime = millis() + 500;
+      digitalWrite(LED, HIGH);
+    }
+    else if( millis() > countdownTime && countdown%2 == 0 )
+    {
+      countdown -= 1;
+      countdownTime = millis() + 500;
       digitalWrite(LED, LOW);
     }
   }
@@ -51,7 +66,7 @@ void loop()
   }
   else if(isPress == false)
   {
-    Serial.println(SN + "_press");
+    Serial.print(String(number) + "_press");
     isPress = true;
   }
   
@@ -59,26 +74,36 @@ void loop()
   while(Serial.available())
   {
     input = Serial.readString(); // read the incoming data as string
-    Serial.print("[READ] " + input);
-    if(stage != "on" && input == SN + "_on\n")
+    Serial.println("[arduino read] " + input);
+    if(stage != "on" && input == String(number) + "_on")
     {
       stage = "on";
-      Serial.println("[ACTION] LIGHT ON");
+      if(isDebug)
+      {
+        Serial.println("[action] light on");
+      }
       digitalWrite(LED, HIGH);
     }
-    else if(stage != "off" && input == SN + "_off\n")
+    else if(stage != "off" && input == String(number) + "_off")
     {
       stage = "off";
-      Serial.println("[ACTION] LIGHT OFF");
+      if(isDebug)
+      {
+        Serial.println("[action] light off");
+      }
       digitalWrite(LED, LOW);
     }
-    else if(stage != "blink" && input == SN + "_blink\n")
+    else if(stage != "blink" && input == String(number) + "_blink")
     {
       stage = "blink";
-      countdown = 50;
-      Serial.println("[ACTION] LIGHT BLINKS");
+      countdown = 8;
+      countdownTime = millis() + 500;
+      if(isDebug)
+      {
+        Serial.println("[action] light blink");
+      }
       digitalWrite(LED, HIGH);
     }
   }
-  delay(10);
+  delay(5);
 }

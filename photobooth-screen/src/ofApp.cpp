@@ -1,59 +1,53 @@
 #include "ofApp.h"
 
 //--------------------------------------------------------------
-void ofApp::setup(){
-	ofBackground(255);
-	ofSetCircleResolution(200);
-    if(!singleCamera)
+
+void ofApp::setup()
+{
+    ofBackground(255);
+    ofSetFrameRate(fps);
+    if(!singleMonitor)
     {
         screenSetup.setup(ofGetWidth(), ofGetHeight(), ofxScreenSetup::MONITOR_2);
     }
-    
-    ofSetFrameRate(30);
     ofSetLogLevel(OF_LOG_VERBOSE);
-
-//    fileName = "testMovie";
-//    fileExt = ".mov"; // ffmpeg uses the extension to determine the container type. run 'ffmpeg -formats' to see supported formats
-//    vidRecorder.setVideoCodec("mpeg4");
-//    vidRecorder.setVideoBitrate("800k");
-//    vidRecorder.setAudioCodec("mp3");
-//    vidRecorder.setAudioBitrate("192k");
-
-//    ofAddListener(vidRecorder.outputFileCompleteEvent, this, &ofApp::recordingComplete);
-    bRecording = false;
-    ofEnableAlphaBlending();
-
-    if(singleCamera) cameraAmount = 1;
-    else cameraAmount = 3;
-
+    serialSetup();
+    
     vidGrabber[0].listDevices();
-    int cameraSelction[3] = { 2, 1, 0 };
-    
-    for (int i = 0; i < cameraAmount ; i++)
+    for (int i = 0; i < cameraQty ; i++)
     {
-        vidGrabber[i].setDeviceID(cameraSelction[i]);
-        vidGrabber[i].initGrabber(960,544);
+        vidGrabber[i].setDeviceID(cameraAssignments[i]);
+        vidGrabber[i].initGrabber(cameraSizes[0],cameraSizes[1]);
+        // Fbo Setting
+        fbo[i].allocate(cameraSizes[0],cameraSizes[1]);
+        fboSizes[i][0] = cameraSizes[0];
+        fboSizes[i][1] = int(vidGrabber[i].getHeight()*(float(cameraSizes[0])/float(vidGrabber[i].getWidth())));
+        fboPositions[i][0] = fboSizes[i][0];
+        fboPositions[i][1] = -(fboSizes[i][1]-fboSizes[i][1])*0.5;
     }
-    
-    // Connect to Press Buttons
+}
+
+//--------------------------------------------------------------
+
+void ofApp::serialSetup()
+{
     std::vector<ofx::IO::SerialDeviceInfo> devicesInfo = ofx::IO::SerialDeviceUtils::listDevices();
-    ofLogNotice("ofxSerial") << "Connected Devices: ";
-    for(int i = 0; i < devicesInfo.size(); i++)
-    {
-        ofLogNotice("ofxSerial") << devicesInfo[i];
-    }
     if (!devicesInfo.empty())
     {
+        deviceQty = 1;
+    
+        ofLogNotice("ofxSerial") << "Connected Devices: ";
         for(int i = 0; i < deviceQty; i++)
         {
-            bool success = device[i].setup(devicesInfo[deviceNumber[i]], 9600);
+            ofLogNotice("ofxSerial") << devicesInfo[i];
+            bool success = device[i].setup(devicesInfo[i], 9600);
             if(success)
             {
-                ofLogNotice("ofxSerial") << "Successfully setup " << devicesInfo[deviceNumber[i]];
+                ofLogNotice("ofxSerial") << "Successfully setup " << devicesInfo[deviceAssignments[i]];
             }
             else
             {
-                ofLogNotice("ofxSerial") << "Unable to setup " << devicesInfo[deviceNumber[i]];
+                ofLogNotice("ofxSerial") << "Unable to setup " << devicesInfo[deviceAssignments[i]];
             }
         }
     }
@@ -64,42 +58,42 @@ void ofApp::setup(){
 }
 
 //--------------------------------------------------------------
-void ofApp::update(){
-
-    for (int i = 0; i < cameraAmount ; i++)
+void ofApp::update()
+{
+    for (int i = 0; i < cameraQty ; i++)
     {
         vidGrabber[i].update();
+        fbo[i].begin();
+        vidGrabber[i].draw( fboPositions[i][0], fboPositions[i][1],
+                           -fboSizes[i][0],     fboSizes[i][1]);
+        fbo[i].end();
     }
-
-    if(vidGrabber[0].isFrameNew() && bRecording){
-        bool success = vidRecorder.addFrame(vidGrabber[0].getPixels());
-        if (!success) {
-            ofLogWarning("This frame was not added!");
-        }
-    }
-    
+    // Serial
     try
     {
         unsigned char buffer[1024]; // Read all bytes from the device;
         for(int i = 0; i < deviceQty; i++)
         {
-            while (device[i].available() > 0)
+            while(device[i].available() > 0)
             {
                 string str;
                 int sz = device[i].readBytes(buffer, 1024);
-                for (int i = 0; i < 7 ; ++i)
+                for(int i = 0; i < sz ; ++i)
                 {
                     str += buffer[i];
                 }
                 ofLogNotice("ofxSerial") << str;
-                if(str == to_string(i) + "_press")
+                for(int k = 0; k < cameraQty; k++)
                 {
-                    device[i].writeBytes(to_string(i) + "_blink\n");
+                    if(str == to_string(k) + "_press")
+                    {
+                        buttonPressed(k);
+                        cout << "hi" << endl;
+                    }
                 }
             }
         }
-        
-        // Send some new bytes to the device to have them echo'd back.
+                // Send some new bytes to the device to have them echo'd back.
         //        std::string text = "Frame Number: " + ofToString(ofGetFrameNum());
         //
         //        ofx::IO::ByteBuffer textBuffer(text);
@@ -112,25 +106,75 @@ void ofApp::update(){
         ofLogError("ofApp::update") << exc.what();
     }
 
-//    if (vidRecorder.hasVideoError()) {
-//        ofLogWarning("The video recorder failed to write some frames!");
-//    }
-//    if (vidRecorder.hasAudioError()) {
-//        ofLogWarning("The video recorder failed to write some audio samples!");
-//    }
-    
+
 }
 
 //--------------------------------------------------------------
-void ofApp::draw(){
-    
-
-
+void ofApp::draw()
+{
     ofBackground(0,0,0);
     ofSetColor(255,255,255);
 
-    for (int i = 0; i < cameraAmount ; i++) {
-        vidGrabber[i].draw(cameraPositions[i][0], cameraPositions[i][1]);
+    for (int i = 0; i < cameraQty ; i++) {
+        
+        fbo[i].draw(cameraPositions[i][0], cameraPositions[i][1]);
+        if(hasShot[i] && isCountdown[i])
+        {
+            screenshot[i].draw(cameraPositions[i][0], cameraPositions[i][1]);
+        }
+        
+        // Draw Countdown Graphic
+        if(isCountdown[i])
+        {
+            if(hasShot[i])
+            {
+                screenshot[i].draw(cameraPositions[i][0], cameraPositions[i][1]);
+            }
+            
+            ofEnableAlphaBlending();
+            float x = cdEndTime[i] - ofGetElapsedTimeMillis();
+            
+            if(x >= cdTimeLength-1000)
+            {
+                ofSetColor(0,0,0,125);
+                ofDrawRectangle(cameraPositions[i][0], cameraPositions[i][1], 260, 75);
+                ofSetColor(255,255,255);
+                ofDrawBitmapString("Get Ready!", cameraPositions[i][0]+20, cameraPositions[i][1]+40);
+            }
+            else if(x > 1000)
+            {
+                ofSetColor(0,0,0,125);
+                ofDrawRectangle(cameraPositions[i][0], cameraPositions[i][1], 260, 75);
+                ofSetColor(255,255,255);
+                ofDrawBitmapString(to_string(int(x/1000)), cameraPositions[i][0]+20, cameraPositions[i][1]+40);
+            }
+            else if(x >= 0)
+            {
+                if(!hasShot[i])
+                {
+                    screenshot[i].grabScreen(cameraPositions[i][0],
+                                             cameraPositions[i][1],
+                                             cameraPositions[i][0] + cameraSizes[0],
+                                             cameraPositions[i][1] + cameraSizes[1]);
+                    screenshot[i].save("screenshot.jpg");
+                    hasShot[i] = true;
+                }
+                ofSetColor(0,0,0,125);
+                ofDrawRectangle(cameraPositions[i][0], cameraPositions[i][1], 260, 75);
+                ofSetColor(255,255,255);
+                ofDrawBitmapString("Shoot!", cameraPositions[i][0]+20, cameraPositions[i][1]+40);
+                ofSetColor(255,255,255,(int(255*(1-abs(500-x)/500))));
+                ofDrawRectangle(cameraPositions[i][0], cameraPositions[i][1],
+                                cameraPositions[i][0] + cameraSizes[0],
+                                cameraPositions[i][1] + cameraSizes[1]);
+            }
+            else if(x <= -cdFreezeLength)
+            {
+                isCountdown[i] = false;
+                hasShot[i] = false;
+            }
+            ofDisableAlphaBlending();
+        }
     }
 
 //    stringstream ss;
@@ -139,103 +183,102 @@ void ofApp::draw(){
 //    << "FPS: " << ofGetFrameRate() << endl
 //    << (bRecording?"pause":"start") << " recording: r" << endl
 //    << (bRecording?"close current video file: c":"") << endl;
-    
-    ofSetColor(0,0,0,100);
-    ofDrawRectangle(0, 0, 260, 75);
-    ofSetColor(255, 255, 255);
+//    ofSetColor(0,0,0,100);
+//    ofDrawRectangle(0, 0, 260, 75);
+//    ofSetColor(255, 255, 255);
 //    ofDrawBitmapString(ss.str(),15,15);
     
-    if(bRecording){
-        ofSetColor(255, 0, 0);
-        ofDrawCircle(ofGetWidth() - 20, 20, 5);
-    }
-    
-    //
-	ofSetColor(gui->color);
-	ofDrawCircle(ofGetWidth()*0.5,ofGetHeight()*0.5,gui->radius);
-	ofSetColor(0);
+//    ofSetColor(gui->color);
+//    ofDrawCircle(ofGetWidth()*0.5,ofGetHeight()*0.5,gui->radius);
+	ofSetColor(255,255,255);
 	ofDrawBitmapString(ofGetFrameRate(),20,20);
 }
 
-void ofApp::exit(){
-    ofRemoveListener(vidRecorder.outputFileCompleteEvent, this, &ofApp::recordingComplete);
-    vidRecorder.close();
+//--------------------------------------------------------------
+void ofApp::exit()
+{
 }
 
 //--------------------------------------------------------------
-void ofApp::recordingComplete(ofxVideoRecorderOutputFileCompleteEventArgs& args){
-    cout << "The recoded video file is now complete." << endl;
-}
-
-//--------------------------------------------------------------
-void ofApp::keyPressed(int key){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::keyReleased(int key){
-    
-    if(key=='r'){
-        bRecording = !bRecording;
-        if(bRecording && !vidRecorder.isInitialized()) {
-            vidRecorder.setup(fileName+ofGetTimestampString()+fileExt, vidGrabber[0].getWidth(), vidGrabber[0].getHeight(), 30);
-            // vidRecorder.setupCustomOutput(vidGrabber.getWidth(), vidGrabber.getHeight(), 30, sampleRate, channels, "-vcodec mpeg4 -b 1600k -acodec mp2 -ab 128k -f mpegts udp://localhost:1234"); // for custom ffmpeg output string (streaming, etc)
-            vidRecorder.start();
-        }
-        else if(!bRecording && vidRecorder.isInitialized()) {
-            vidRecorder.setPaused(true);
-        }
-        else if(bRecording && vidRecorder.isInitialized()) {
-            vidRecorder.setPaused(false);
+void ofApp::keyPressed(int key)
+{
+    for (int i = 0; i < deviceQty ; i++) {
+        switch(key)
+        {
+            case 'q':
+                buttonPressed(0);
+                break;
+            case 'w':
+                buttonPressed(1);
+                break;
+            case 'e':
+                buttonPressed(2);
+                break;
         }
     }
-    if(key=='c'){
-        bRecording = false;
-        vidRecorder.close();
+}
+
+//--------------------------------------------------------------
+void ofApp::buttonPressed(int button)
+{
+    if(!isCountdown[button])
+    {
+        isCountdown[button] = true;
+        cdEndTime[button] = ofGetElapsedTimeMillis() + cdTimeLength;
+        for(int k = 0; k < deviceQty; k++)
+        {
+            device[k].writeBytes(to_string(button) + "_blink");
+        }
     }
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseMoved(int x, int y ){
 
+void ofApp::keyReleased(int key)
+{
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button){
-
+void ofApp::mouseMoved(int x, int y )
+{
 }
 
 //--------------------------------------------------------------
-void ofApp::mousePressed(int x, int y, int button){
-
+void ofApp::mouseDragged(int x, int y, int button)
+{
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button){
-
+void ofApp::mousePressed(int x, int y, int button)
+{
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseEntered(int x, int y){
-
+void ofApp::mouseReleased(int x, int y, int button)
+{
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseExited(int x, int y){
-
+void ofApp::mouseEntered(int x, int y)
+{
 }
 
 //--------------------------------------------------------------
-void ofApp::windowResized(int w, int h){
-
+void ofApp::mouseExited(int x, int y)
+{
 }
 
 //--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg){
-
+void ofApp::windowResized(int w, int h)
+{
 }
 
 //--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo){ 
+void ofApp::gotMessage(ofMessage msg)
+{
+}
 
+//--------------------------------------------------------------
+void ofApp::dragEvent(ofDragInfo dragInfo)
+{
 }
