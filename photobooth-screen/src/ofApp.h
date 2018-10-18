@@ -3,7 +3,6 @@
 #include "ofMain.h"
 #include "GuiApp.h"
 #include "ofxScreenSetup.h"
-#include "ofxVideoRecorder.h"
 #include "ofxSerial.h"
 
 class ofApp : public ofBaseApp{
@@ -25,33 +24,48 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
-		
-		shared_ptr<GuiApp> gui;
-
-        const bool singleCamera = true;
-        int cameraAmount;
-        const int cameraPositions[3][2] = { {0,0},{0,544},{960,544} };
-
-        // Screen Setup
-        ofxScreenSetup screenSetup;
     
-        // Video Recorder
-        ofVideoGrabber      vidGrabber[4];
-        ofxVideoRecorder    vidRecorder;
-        bool bRecording;
-        int sampleRate;
-        int channels;
-        string fileName;
-        string fileExt;
+        void serialSetup();
+        void buttonPressed(int button);
 
-        void recordingComplete(ofxVideoRecorderOutputFileCompleteEventArgs& args);
+    // Basic Setup
+    const int fps = 24;
+    const bool singleMonitor = false;
+    const int cameraQty = 3;
+    const int cameraSizes[2] = { 960, 540 };
+    const int cameraPositions[4][2] = { {0,0},{960,0},{0,540},{960,540} };
+    const int cameraAssignments[3] = { 0, 1, 2 };
+    const float cdTimeLength = 7000;
+    const float cdFreezeLength = 2000;
+    
+    int deviceQty;
+    const int deviceAssignments[3] = { 0, 1, 2 };
+    
+    
+    // Fbo
+    ofFbo fbo[3];
+    int fboSizes[3][2];
+    int fboPositions[3][2];
+
+
+    
+    // Screen & Interface Setup
+    ofxScreenSetup screenSetup;
+    shared_ptr<GuiApp> gui;
+    
+    // Screenshot
+    ofImage screenshot[3];
+    bool hasShot[3] = { false, false, false };
+    
+    // Video Recorder
+    ofVideoGrabber vidGrabber[3];
 
     // Press Buttons
-    const int deviceQty = 1;
-    const int deviceNumber[3] = { 0, 1, 2 };
+
     ofx::IO::SerialDevice device[10];
-    
-//        ofFbo recordFbo;
-//        ofPixels recordPixels;
-    
+
+    // Countdown
+    bool isCountdown[3] = { false, false, false };
+    float cdEndTime[3];
+        
 };

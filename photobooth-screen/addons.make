@@ -3,4 +3,3 @@ ofxIO
 ofxPoco
 ofxScreenSetup
 ofxSerial
-ofxVideoRecorder
