@@ -2,7 +2,7 @@
 # python -m serial.tools.list_ports
 
 import csv, copy, os
-# import serial
+import serial
 from tkinter import *
 from tkinter import filedialog
 
@@ -15,7 +15,6 @@ class Window(Frame):
         self.hasLoadedFile = False
 
     def initUI(self):
-
         self.parent.title("A/B Machines DVI Matrix Control")
         self.pack(fill=BOTH, expand=1)
 
