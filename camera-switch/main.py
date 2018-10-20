@@ -1,8 +1,7 @@
 # Listing ports:
 # python -m serial.tools.list_ports
 
-import csv, copy, os
-import serial
+import csv, copy, os, serial, time
 from tkinter import *
 from tkinter import filedialog
 
@@ -12,6 +11,7 @@ class Window(Frame):
         Frame.__init__(self, parent)
         self.parent = parent
         self.initUI()
+        self.initSerial('')
         self.hasLoadedFile = False
 
     def initUI(self):
@@ -58,6 +58,14 @@ class Window(Frame):
         message.config(bg='lightgreen')
         message.place(x=35, y=145, height=30, )
         self.message.set('[notice] please load the cue list file')
+
+    def initSerial(self, port):
+        if (port == ''):
+            self.hasSerialPort = False
+        else:
+            self.matrix = serial.Serial(port, 9600, timeout=.1)
+            time.sleep(5) # give the connection a second to settle
+            self.hasSerialPort = True
 
     def onOpen(self):
         ft = [('CSV files', '*.csv'), ('All files', '*')]
@@ -132,7 +140,10 @@ class Window(Frame):
         for i in range(1,9):
             for output in str(self.cueList[self.currentCue][i]):
                 if output in '12345678':
-                    print('[serial] ' + '{' + str(i) + '@' + str(output) + '}')
+                    tstr = '{' + str(i) + '@' + str(output) + '}'
+                    if self.hasSerialPort:
+                        arduino.write(tstr.encode('UTF-8'))
+                    print('[serial] ' + tstr)
         return 112
 
 
