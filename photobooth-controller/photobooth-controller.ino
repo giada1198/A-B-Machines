@@ -14,8 +14,8 @@
 int LED = 12;
 int BUTTON = 7;
 
-bool isDebug = false;
-int number = 1;
+bool isDebug = true;
+int number = 5;
 
 String stage = "off";
 String input;
