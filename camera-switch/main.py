@@ -137,10 +137,10 @@ class Window(Frame):
         return False
 
     def executeCue(self):
-        for i in range(1,9):
-            for output in str(self.cueList[self.currentCue][i]):
+        for input in range(1,4):
+            for output in str(self.cueList[self.currentCue][input]):
                 if output in '12345678':
-                    tstr = '{' + str(i) + '@' + str(output) + '}'
+                    tstr = '{' + str(input) + '@' + str(output) + '}'
                     if self.hasSerialPort:
                         arduino.write(tstr.encode('UTF-8'))
                     print('[serial] ' + tstr)
