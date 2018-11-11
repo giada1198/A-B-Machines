@@ -93,20 +93,11 @@ void ofApp::update()
                 }
             }
         }
-                // Send some new bytes to the device to have them echo'd back.
-        //        std::string text = "Frame Number: " + ofToString(ofGetFrameNum());
-        //
-        //        ofx::IO::ByteBuffer textBuffer(text);
-        //
-        //        device.writeBytes(textBuffer);
-        //        device.writeByte('\n');
     }
     catch (const std::exception& exc)
     {
         ofLogError("ofApp::update") << exc.what();
     }
-
-
 }
 
 //--------------------------------------------------------------
@@ -144,9 +135,7 @@ void ofApp::draw()
                 screenshot[i].draw(cameraPositions[i][0], cameraPositions[i][1]);
             }
             
-            
             float x = cdEndTime[i] - ofGetElapsedTimeMillis();
-            
             if(x >= cdTimeLength-1000)
             {
                 if(gui->isDebug)
