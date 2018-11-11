@@ -1,9 +1,12 @@
 # Listing ports:
 # python -m serial.tools.list_ports
+import argparse, csv, copy, math, os, serial, threading, time
 
-import csv, copy, os, serial, time
 from tkinter import *
 from tkinter import filedialog
+
+from pythonosc import dispatcher
+from pythonosc import osc_server
 
 class Window(Frame):
 
@@ -146,10 +149,45 @@ class Window(Frame):
                     print('[serial] ' + tstr)
         return 112
 
+    def test(self):
+        print("hahaha")
+
+def printOSC(unused_addr, args, cue):
+    try:
+        app.gotoCueNumber.set(cue)
+        app.gotoCue()
+    except:
+        pass
+    print("[osc   ] {0} {1}".format(args[0], cue))
+
+def nothing():
+    pass
 
 if __name__ == '__main__':
     root = Tk()
     root.geometry("400x200+100+100")
     root.resizable(width=False, height=False)
+    # disable close button
+    # root.protocol("WM_DELETE_WINDOW", nothing)
+
     app = Window(root)
+
+    # OSC server setting
+    oscIP = "localhost"
+    oscPort = 5005
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--ip", default=oscIP, help="The IP to listen on")
+    parser.add_argument("--port", type=int, default=oscPort, help="The port to listen on")
+    args = parser.parse_args()
+
+    dispatcher = dispatcher.Dispatcher()
+    dispatcher.map("/matrix/launchCue", printOSC, "/matrix/launchCue")
+
+    server = osc_server.ThreadingOSCUDPServer((args.ip, args.port), dispatcher)
+    print("Serving on {}".format(server.server_address))
+    serverThread = threading.Thread(target=server.serve_forever)
+    serverThread.start()
+
     root.mainloop()
+    server.shutdown()
