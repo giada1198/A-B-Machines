@@ -149,9 +149,6 @@ class Window(Frame):
                     print('[serial] ' + tstr)
         return 112
 
-    def test(self):
-        print("hahaha")
-
 def printOSC(unused_addr, args, cue):
     try:
         app.gotoCueNumber.set(cue)
@@ -160,8 +157,8 @@ def printOSC(unused_addr, args, cue):
         pass
     print("[osc   ] {0} {1}".format(args[0], cue))
 
-def nothing():
-    pass
+# def nothing():
+#     pass
 
 if __name__ == '__main__':
     root = Tk()
