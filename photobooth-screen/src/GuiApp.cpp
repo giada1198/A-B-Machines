@@ -17,6 +17,10 @@ void GuiApp::setup()
     gui.add(button[1].setup("Button 2 Liz"));
     gui.add(button[2].setup("Button 3 Marilyn"));
     
+    // listen on the given port
+    ofLog() << "listening for osc messages on port " << PORT;
+    oscReceiver.setup(PORT);
+    
 	ofBackground(0);
 	ofSetVerticalSync(false);
 }
@@ -24,6 +28,25 @@ void GuiApp::setup()
 //--------------------------------------------------------------
 void GuiApp::update()
 {
+    // check for waiting messages
+    while (oscReceiver.hasWaitingMessages())
+    {
+        // get the next message
+        ofxOscMessage m;
+        oscReceiver.getNextMessage(m);
+        if (m.getAddress() == "/photobooth")
+        {
+            string s = m.getArgAsString(0);
+            if (s == "photobooth" && isScreenTest)
+            {
+                isScreenTest = false;
+            }
+            else if (s == "screentest" && !isScreenTest)
+            {
+                isScreenTest = true;
+            }
+        }
+    }
 }
 
 //--------------------------------------------------------------

@@ -2,6 +2,10 @@
 
 #include "ofMain.h"
 #include "ofxGui.h"
+#include "ofxOsc.h"
+
+// osc listening port
+#define PORT 6000
 
 class GuiApp: public ofBaseApp
 {
@@ -14,6 +18,8 @@ class GuiApp: public ofBaseApp
     void button1Pressed();
     void button2Pressed();
     void button3Pressed();
+    
+    ofxOscReceiver oscReceiver;
     
     ofxPanel gui;
     ofParameterGroup parameters;
