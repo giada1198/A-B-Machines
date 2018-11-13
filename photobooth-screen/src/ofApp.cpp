@@ -11,10 +11,11 @@ void ofApp::setup()
         screenSetup.setup(ofGetWidth(), ofGetHeight(), ofxScreenSetup::MONITOR_2);
     }
     ofSetLogLevel(OF_LOG_VERBOSE);
+    ofSetDrawBitmapMode(OF_BITMAPMODE_MODEL);
     serialSetup();
     
     vidGrabber[0].listDevices();
-    for (int i = 0; i < cameraQty ; i++)
+    for (int i = 0; i < 3 ; i++)
     {
         vidGrabber[i].setDeviceID(cameraAssignments[i]);
         vidGrabber[i].initGrabber(cameraSizes[0],cameraSizes[1]);
@@ -25,29 +26,36 @@ void ofApp::setup()
         fboPositions[i][0] = fboSizes[i][0];
         fboPositions[i][1] = -(fboSizes[i][1]-fboSizes[i][1])*0.5;
     }
+    // load images
+    screenTestGrid.load("screen-test-grid.png");
+    for (int i = 0; i < 6 ; i++)
+    {
+        numberImages[i].load("number-" + to_string(i) + ".png");
+    }
 }
 
 //--------------------------------------------------------------
-
 void ofApp::serialSetup()
 {
     std::vector<ofx::IO::SerialDeviceInfo> devicesInfo = ofx::IO::SerialDeviceUtils::listDevices();
     if (!devicesInfo.empty())
     {
-        deviceQty = 1;
-    
+        serialDeviceQty = devicesInfo.size();
+        // allocate the vector to have as many SerialDevice as devicesInfo
+        serialDevice.assign(serialDeviceQty, ofx::IO::SerialDevice());
+        // connection info
         ofLogNotice("ofxSerial") << "Connected Devices: ";
-        for(int i = 0; i < deviceQty; i++)
+        for(int i = 0; i < serialDeviceQty; i++)
         {
             ofLogNotice("ofxSerial") << devicesInfo[i];
-            bool success = device[i].setup(devicesInfo[i], 9600);
+            bool success = serialDevice[i].setup(devicesInfo[i], 9600);
             if(success)
             {
-                ofLogNotice("ofxSerial") << "Successfully setup " << devicesInfo[deviceAssignments[i]];
+                ofLogNotice("ofxSerial") << "Successfully setup " << devicesInfo[i];
             }
             else
             {
-                ofLogNotice("ofxSerial") << "Unable to setup " << devicesInfo[deviceAssignments[i]];
+                ofLogNotice("ofxSerial") << "Unable to setup " << devicesInfo[i];
             }
         }
     }
@@ -60,35 +68,41 @@ void ofApp::serialSetup()
 //--------------------------------------------------------------
 void ofApp::update()
 {
-    for (int i = 0; i < cameraQty ; i++)
+    for(int i = 0; i < 3 ; i++)
     {
+        // press button event from gui
+        if(gui->isVirtualButtonPressed[i])
+        {
+            buttonPressed(i);
+            gui->isVirtualButtonPressed[i] = false;
+        }
+        // scale and crop image from camera
         vidGrabber[i].update();
         fbo[i].begin();
         vidGrabber[i].draw( fboPositions[i][0], fboPositions[i][1],
                            -fboSizes[i][0],     fboSizes[i][1]);
         fbo[i].end();
     }
-    // Serial
+    // receive serial command from arduino
     try
     {
-        unsigned char buffer[1024]; // Read all bytes from the device;
-        for(int i = 0; i < deviceQty; i++)
+        unsigned char buffer[1024]; // read all bytes from the device;
+        for (int i = 0; i < serialDeviceQty; i++)
         {
-            while(device[i].available() > 0)
+            while (serialDevice[i].available() > 0)
             {
                 string str;
-                int sz = device[i].readBytes(buffer, 1024);
-                for(int i = 0; i < sz ; ++i)
+                int sz = serialDevice[i].readBytes(buffer, 1024);
+                for (int i = 0; i < sz ; ++i)
                 {
                     str += buffer[i];
                 }
                 ofLogNotice("ofxSerial") << str;
-                for(int k = 0; k < cameraQty; k++)
+                for (int k = 0; k < 3; k++)
                 {
-                    if(str == to_string(k) + "_press")
+                    if (str == to_string(k) + "_press")
                     {
                         buttonPressed(k);
-                        cout << "hi" << endl;
                     }
                 }
             }
@@ -105,82 +119,132 @@ void ofApp::draw()
 {
     ofBackground(0,0,0);
     ofSetColor(255,255,255);
-
-    for (int i = 0; i < cameraQty ; i++) {
-        
+    
+    // photo booth -> screen test
+    if (gui->isScreenTest && mode == "photo_booth")
+    {
+        mode = "screen_test";
+        // reset all three booths
+        for (int k = 0; k < 3; k++)
+        {
+            isCountdown[k] = false;
+            hasShot[k] = false;
+        }
+    }
+    // screen test -> photo booth
+    else if (!gui->isScreenTest && mode == "screen_test")
+    {
+        mode = "photo_booth";
+        for (int k = 0; k < 3; k++)
+        {
+            isCountdown[k] = false;
+        }
+    }
+    // draw and save camera / screen shot
+    for (int i = 0; i < 3; i++) {
         fbo[i].draw(cameraPositions[i][0], cameraPositions[i][1]);
         if(hasShot[i] && isCountdown[i])
         {
             screenshot[i].draw(cameraPositions[i][0], cameraPositions[i][1]);
         }
-        ofEnableAlphaBlending();
-        
-        // Debug Mode
-        if(gui->isDebug)
-        {
-            ofSetColor(0,0,0,125);
-            ofDrawRectangle(cameraPositions[i][0], cameraPositions[i][1], 260, 75);
-            stringstream ss;
-            ss << "photo booth number: " << i << endl
-            << "fps: " << int(ofGetFrameRate()) << endl;
-            ofSetColor(255,255,255);
-            ofDrawBitmapString(ss.str(), cameraPositions[i][0]+20, cameraPositions[i][1]+20);
-        }
-        
-        // Draw Countdown Graphic
+        // draw countdown image
         if(isCountdown[i])
         {
-            if(hasShot[i])
+            float x = cdEndTime[i] - ofGetElapsedTimeMillis();  // time remaining on record
+            float y = cdNextScreenShotTime[i] - ofGetElapsedTimeMillis();  // time remaining to the next shot
+            // take screen shot and calculate time of next shot
+            if(y < 0 && cdScreenShotNumber[i] < screenShotQty[i])
             {
-                screenshot[i].draw(cameraPositions[i][0], cameraPositions[i][1]);
-            }
-            
-            float x = cdEndTime[i] - ofGetElapsedTimeMillis();
-            if(x >= cdTimeLength-1000)
-            {
-                if(gui->isDebug)
+                string path;
+                if (mode == "photo_booth")
                 {
-                    ofSetColor(255,255,255);
-                    ofDrawBitmapString("Get Ready!", cameraPositions[i][0]+20, cameraPositions[i][1]+60);
+                    cdNextScreenShotTime[i] += 1000/photoBoothFps;
+                    screenshot[i].grabScreen(cameraPositions[i][0], cameraPositions[i][1],
+                                             cameraSizes[0], cameraSizes[1]);
+                    path = "audience/" + generateScreenShotName(pressButtonTime[i], cdScreenShotNumber[i], true);
                 }
-            }
-            else if(x > 1000)
-            {
-                if(gui->isDebug)
+                else if (mode == "screen_test")
                 {
-                    ofSetColor(255,255,255);
-                    ofDrawBitmapString(to_string(int(x/1000)),
-                                       cameraPositions[i][0]+20, cameraPositions[i][1]+60);
+                    cdNextScreenShotTime[i] += 1000/screenTestFps;
+                    screenshot[i].grabScreen(cameraPositions[i][0]+screenTestGridDescent[i], cameraPositions[i][1],
+                                             screenTestGridSize[1], screenTestGridSize[0]);
+                    path = infoName[i] + "/" + generateScreenShotName(pressButtonTime[i], cdScreenShotNumber[i], false);
                 }
+                screenshot[i].save(path);
+                cdScreenShotNumber[i] += 1;
             }
-            else if(x >= 0)
+            // draw countdown image in photo booth mode
+            if (mode == "photo_booth")
             {
-                if(!hasShot[i])
+                ofEnableAlphaBlending();
+                if(x >= cdTimeLength - 1000)  // draw "get ready" image
                 {
-                    screenshot[i].grabScreen(cameraPositions[i][0],
-                                             cameraPositions[i][1],
-                                             cameraPositions[i][0] + cameraSizes[0],
-                                             cameraPositions[i][1] + cameraSizes[1]);
-                    screenshot[i].save("screenshot.jpg");
-                    hasShot[i] = true;
+                    numberImages[5].draw(cameraPositions[i][0]+280, cameraPositions[i][1],
+                                         numberImages[5].getWidth(), numberImages[5].getHeight());
                 }
-                if(gui->isDebug)
+                else if (x > 1000)  // draw image of number
                 {
-                    ofSetColor(255,255,255);
-                    ofDrawBitmapString("Shoot!", cameraPositions[i][0]+20, cameraPositions[i][1]+60);
+                    int m = int(x/1000)-1;
+                    numberImages[m].draw(cameraPositions[i][0]+280, cameraPositions[i][1],
+                                         numberImages[m].getWidth(), numberImages[m].getHeight());
                 }
-                ofSetColor(255,255,255,(int(255*(1-abs(500-x)/500))));
-                ofDrawRectangle(cameraPositions[i][0], cameraPositions[i][1],
-                                cameraPositions[i][0] + cameraSizes[0],
-                                cameraPositions[i][1] + cameraSizes[1]);
+                else if (x >= 0)  // shot flash
+                {
+                    if(!hasShot[i])
+                    {
+                        screenshot[i].grabScreen(cameraPositions[i][0], cameraPositions[i][1],
+                                                 cameraSizes[0], cameraSizes[1]);
+                        string path = "instagram/" + generateScreenShotName(pressButtonTime[i], 30, true);
+                        screenshot[i].save(path);
+                        hasShot[i] = true;
+                    }
+                    ofSetColor(255,255,255,(int(255*(1-abs(500-x)/500))));
+                    ofDrawRectangle(cameraPositions[i][0], cameraPositions[i][1],
+                                    cameraPositions[i][0] + cameraSizes[0],
+                                    cameraPositions[i][1] + cameraSizes[1]);
+                }
+                else if (x <= -cdFreezeLength)  // after shot
+                {
+                    isCountdown[i] = false;
+                    hasShot[i] = false;
+                }
+                ofDisableAlphaBlending();
             }
-            else if(x <= -cdFreezeLength)
+            else if (mode == "screen_test")
             {
-                isCountdown[i] = false;
-                hasShot[i] = false;
+                if (x >= 0)
+                {
+                    cout << to_string(int(x/1000)-1) << endl;
+                    screenTestStatus[i] = "Recording... " + to_string(int(x/1000)+1) + "s left";
+                }
+                else
+                {
+                    isCountdown[i] = false;
+                    screenTestStatus[i] = "Standby";
+                }
             }
         }
-        ofDisableAlphaBlending();
+        // draw instructions for actors in screen test mode
+        if (mode == "screen_test")
+        {
+            ofPushMatrix();
+            ofTranslate(0,1080,0);
+            ofRotate(270,0,0,1);
+            ofSetColor(0,0,0,125);
+            ofEnableAlphaBlending();
+            ofDrawRectangle(infoPosition[i][0], infoPosition[i][1], 300, 70);
+            ofDisableAlphaBlending();
+            string status;
+            stringstream ss;
+            ss << "Booth Number: " << i+1 << endl
+            << "Screen Tester: " << infoName[i] << endl
+            << "Status: " << screenTestStatus[i] << endl;
+            ofSetColor(255,255,255);
+            ofDrawBitmapString(ss.str(), infoPosition[i][0]+20, infoPosition[i][1]+25);
+            screenTestGrid.draw(infoPosition[i][0]+5, infoPosition[i][1]+screenTestGridDescent[i]+5,
+                                screenTestGridSize[0]-10, screenTestGridSize[1]-10);
+            ofPopMatrix();
+        }
     }
 }
 
@@ -190,85 +254,58 @@ void ofApp::exit()
 }
 
 //--------------------------------------------------------------
-void ofApp::keyPressed(int key)
-{
-    for (int i = 0; i < deviceQty ; i++) {
-        switch(key)
-        {
-            case 'q':
-                buttonPressed(0);
-                break;
-            case 'w':
-                buttonPressed(1);
-                break;
-            case 'e':
-                buttonPressed(2);
-                break;
-        }
-    }
-}
-
-//--------------------------------------------------------------
 void ofApp::buttonPressed(int button)
 {
     if(!isCountdown[button])
     {
         isCountdown[button] = true;
-        cdEndTime[button] = ofGetElapsedTimeMillis() + cdTimeLength;
-        for(int k = 0; k < deviceQty; k++)
+        pressButtonTime[button] = ofGetSystemTimeMillis();
+        cdScreenShotNumber[button] = 0;
+        if (mode == "photo_booth")
         {
-            device[k].writeBytes(to_string(button) + "_blink");
+            cdEndTime[button] = ofGetElapsedTimeMillis() + cdTimeLength;
+            screenShotQty[button] = photoBoothFps*5;
+            cdNextScreenShotTime[button] = ofGetElapsedTimeMillis() + 1000;
+            // button blinks only in photo booth mode
+            for (int k = 0; k < serialDeviceQty; k++)
+            {
+                serialDevice[k].writeBytes(to_string(button) + "_blink");
+            }
+        }
+        else if (mode == "screen_test")
+        {
+            cdEndTime[button] = ofGetElapsedTimeMillis() + 3*60*1000;
+            screenShotQty[button] = screenTestFps*180;  // 3m = 180s
+            cdNextScreenShotTime[button] = ofGetElapsedTimeMillis();
+            cout << "press!" << endl;
         }
     }
 }
 
 //--------------------------------------------------------------
-
-void ofApp::keyReleased(int key)
+string ofApp::generateScreenShotName(int time, int number, bool isPhotoBooth)
 {
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseMoved(int x, int y )
-{
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button)
-{
-}
-
-//--------------------------------------------------------------
-void ofApp::mousePressed(int x, int y, int button)
-{
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button)
-{
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseEntered(int x, int y)
-{
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseExited(int x, int y)
-{
-}
-
-//--------------------------------------------------------------
-void ofApp::windowResized(int w, int h)
-{
-}
-
-//--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg)
-{
-}
-
-//--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo)
-{
+    string output;
+    string s = "";
+    if (isPhotoBooth)
+    {
+        output = to_string(time);
+        // computer clock time
+        int r0 = 10 - output.length();
+        for (int i = 0; i < r0; i++)
+        {
+            output = "0" + output;
+        }
+        s = "_";
+    }
+    // image sequence number
+    int r1 = 4 - to_string(number).length();
+    for (int i = 0; i < r1; i++)
+    {
+        s = s + "0";
+    }
+    output = output + s + to_string(number);
+    // performance session number
+    output = to_string(gui->performance) + "_" + output + ".jpg";
+    return output;
 }
