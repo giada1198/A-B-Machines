@@ -8,7 +8,9 @@ An immersive theater project that explores people chasing American dream and the
 
 * **photobooth-controller** - Arduino
 * **photobooth-screen** - openFrameworks
+* **photobooth-player** - openFrameworks
 * **lip-sync-prototype** - openFrameworks
+* **camera-switch** - Python Tkinter
 
 ## Getting Started
 
