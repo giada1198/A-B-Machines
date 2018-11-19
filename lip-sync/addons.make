@@ -1,3 +1,4 @@
 ofxCv
-ofxOpenCv
 ofxOpenFace
+ofxOsc
+ofxSyphon
