@@ -1,6 +1,7 @@
 # Listing ports:
 # python -m serial.tools.list_ports
 import argparse, csv, copy, math, os, serial, threading, time
+from random import randint
 
 from tkinter import *
 from tkinter import filedialog
@@ -14,8 +15,10 @@ class Window(Frame):
         Frame.__init__(self, parent)
         self.parent = parent
         self.initUI()
-        self.initSerial('')
+        self.initSerial('/dev/cu.USA19H141P1.1')
         self.hasLoadedFile = False
+        self.isRandom = False
+        self.freq = 0
 
     def initUI(self):
         self.parent.title("A/B Machines DVI Matrix Control")
@@ -129,34 +132,52 @@ class Window(Frame):
                 return False
 
         for i in range(self.cueListLength):
-            if cn == str(self.cueList[i][0]):
+            if round(float(cn),2) == round(float(self.cueList[i][0]),2):
                 self.currentCue = i
                 self.executeCue()
                 self.updateCueText()
-                self.message.set('[action] goto cue ' + cn)
+                self.message.set('[action] goto cue ' + str(self.cueList[i][0]))
                 return True
 
         self.message.set('[notice] the cue number you entered is invalid')
         return False
 
     def executeCue(self):
-        for input in range(1,4):
+        for input in range(1,5):
             for output in str(self.cueList[self.currentCue][input]):
                 if output in '12345678':
                     tstr = '{' + str(input) + '@' + str(output) + '}'
                     if self.hasSerialPort:
-                        arduino.write(tstr.encode('UTF-8'))
-                    print('[serial] ' + tstr)
+                        self.matrix.write(tstr.encode('UTF-8'))
+                    print('[serial][cue ' + str(self.cueList[self.currentCue][0]) + '] ' + tstr)
         return 112
 
 def printOSC(unused_addr, args, cue):
     try:
-        app.gotoCueNumber.set(cue)
-        app.gotoCue()
+        if not app.isRandom:
+            if int(cue) > 900:
+                app.freq = int(cue)-900
+                app.isRandom = True
+                randomThread = threading.Thread(target=random)
+                randomThread.start()
+            else:
+                app.gotoCueNumber.set(cue)
+                app.gotoCue()
+        elif int(cue) == 999:
+            app.isRandom = False
     except:
         pass
     print("[osc   ] {0} {1}".format(args[0], cue))
 
+def random():
+    while app.isRandom:
+        for output in range(1,8):
+            input = randint(1,3)
+            tstr = '{' + str(input) + '@' + str(output) + '}'
+            if app.hasSerialPort:
+                app.matrix.write(tstr.encode('UTF-8'))
+            print('[serial][random] ' + tstr)
+        time.sleep(app.freq*0.1)
 # def nothing():
 #     pass
 
@@ -171,7 +192,7 @@ if __name__ == '__main__':
 
     # OSC server setting
     oscIP = "localhost"
-    oscPort = 5005
+    oscPort = 5500
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--ip", default=oscIP, help="The IP to listen on")
@@ -188,3 +209,4 @@ if __name__ == '__main__':
 
     root.mainloop()
     server.shutdown()
+    app.isRandom = False
