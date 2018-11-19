@@ -161,7 +161,7 @@ void ofApp::draw()
                     cdNextScreenShotTime[i] += 1000/photoBoothFps;
                     screenshot[i].grabScreen(cameraPositions[i][0], cameraPositions[i][1],
                                              cameraSizes[0], cameraSizes[1]);
-                    path = "audience/" + generateScreenShotName(pressButtonTime[i], cdScreenShotNumber[i], true);
+                    path = "audience-" + to_string(i+1) + "/" + generateScreenShotName(pressButtonTime[i], cdScreenShotNumber[i], true);
                 }
                 else if (mode == "screen_test")
                 {
@@ -215,7 +215,8 @@ void ofApp::draw()
                 if (x >= 0)
                 {
                     cout << to_string(int(x/1000)-1) << endl;
-                    screenTestStatus[i] = "Recording... " + to_string(int(x/1000)+1) + "s left";
+                    screenTestStatus[i] = "Recording...";
+                    // screenTestStatus[i] = "Recording... " + to_string(int(x/1000)+1) + "s left";
                 }
                 else
                 {
@@ -306,6 +307,7 @@ string ofApp::generateScreenShotName(int time, int number, bool isPhotoBooth)
     }
     output = output + s + to_string(number);
     // performance session number
-    output = to_string(gui->performance) + "_" + output + ".jpg";
+    // output = to_string(gui->performance) + "_" + output + ".jpg";
+    output = output + ".jpg";
     return output;
 }

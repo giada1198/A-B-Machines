@@ -8,8 +8,8 @@ void GuiApp::setup()
     button[2].addListener(this, &GuiApp::button3Pressed);
     
 	parameters.setName("A/B Machines");
-    parameters.add(performance.set("Performance:",1,1,8));
-    parameters.add(performanceLabel.set(sessions[0]));
+//    parameters.add(performance.set("Performance:",1,1,8));
+//    parameters.add(performanceLabel.set(sessions[0]));
     parameters.add(isScreenTest.set("Screen Test", false));
     
     gui.setup(parameters);

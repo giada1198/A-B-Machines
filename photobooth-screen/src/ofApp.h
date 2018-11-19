@@ -25,12 +25,12 @@ class ofApp : public ofBaseApp
     const int photoBoothFps = 6;
     const int screenTestFps = 12;
     const bool singleMonitor = false;
-    string mode = "photo_booth";
+    string mode = "screen_test";
     
     // camera
     const int cameraSizes[2] = { 960, 540 };
     const int cameraPositions[4][2] = { {0,0},{960,0},{0,540},{960,540} };
-    const int cameraAssignments[3] = { 0, 0, 0 };
+    const int cameraAssignments[3] = { 1, 1, 1 };
     
     // screen shot
     ofVideoGrabber vidGrabber[3];
