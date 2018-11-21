@@ -1,35 +1,43 @@
 #pragma once
 
-#define OPENFACE_USE_MULTI true
-
 #include "ofMain.h"
 #include "ofxOsc.h"
 #include "ofxSyphon.h"
-#include "ofxCv.h"
-#include "ofxOpenFace.h"
+#include "ofxThreadedImageLoader.h"
 
 // listening port
-#define PORT 9000
+#define PORT 6000
 
 class ofApp : public ofBaseApp
 {
-    public:
-        void setup();
-        void update();
-        void draw();
-        void exit();    
-        void keyPressed(int key);
+	public:
+		void setup();
+		void update();
+		void draw();
+		void keyPressed(int key);
+    
+    void loadImages(ofDirectory& dir, vector<ofImage>& img, string name);
+
+    string mode = "none";
     
     ofxOscReceiver oscReceiver;
     ofxSyphonServer syphonServer;
     
-    ofxOpenFace::Thread oft;
-    ofxOpenFace::Tracker tkr;
-    ofVideoGrabber grabber;
+    ofxThreadedImageLoader threadedImageloader1;
+    ofxThreadedImageLoader threadedImageloader2;
+    ofxThreadedImageLoader threadedImageloader3;
     
-    ofFbo fbo1, fbo2, fbo3, fbo4;
-    ofFbo mask;
+    ofDirectory dirJackie;
+    ofDirectory dirLiz;
+    ofDirectory dirMarilyn;
     
-    bool isLipSync = true;
-    ofxSyphonClient mClient;
+    vector<ofImage> imgJackie;
+    vector<ofImage> imgLiz;
+    vector<ofImage> imgMarilyn;
+    
+    bool hasLoadedJackie = false;
+    bool hasLoadedLiz = false;
+    bool hasLoadedMarilyn = false;
+    
+    int currentImage = 0;
 };
