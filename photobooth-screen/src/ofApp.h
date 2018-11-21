@@ -12,10 +12,10 @@ class ofApp : public ofBaseApp
 		void update();
 		void draw();
         void exit();
-    
+
         void serialSetup();
         void photoSetup();
-    
+
         void buttonPressed(int button);
         static void virtualButtonPressed();
         string generateScreenShotName(int time, int number, bool isPhotoBooth);
@@ -25,29 +25,30 @@ class ofApp : public ofBaseApp
     const int photoBoothFps = 6;
     const int screenTestFps = 12;
     const bool singleMonitor = false;
-    string mode = "screen_test";
-    
+    // string mode = "screen_test";
+	string mode[3] = { "screen_test", "screen_test", "screen_test" };
+
     // camera
     const int cameraSizes[2] = { 960, 540 };
     const int cameraPositions[4][2] = { {0,0},{960,0},{0,540},{960,540} };
-    const int cameraAssignments[3] = { 1, 1, 1 };
-    
+    const int cameraAssignments[3] = { 0, 0, 0 };
+
     // screen shot
     ofVideoGrabber vidGrabber[3];
     ofImage screenshot[3];
     bool hasShot[3] = { false, false, false };
     int screenShotQty[3];
-    
+
     // screen test
     string screenTestStatus[3] = { "Standby", "Standby", "Standby" };
     ofImage screenTestGrid;
     const int screenTestGridSize[2] = { 540, 440 };
     const int screenTestGridDescent[3] = { 200, 200, 100 };  // Jackie, Liz, Marilyn
-    
+
     // info box in screen test mode
     const int infoPosition[3][2] = { {540,0}, {540,960}, {0,0} };
     const string infoName[3] = { "Jackie", "Liz", "Marilyn" };
-    
+
     // fbo
     ofFbo fbo[3];
     int fboSizes[3][2];
@@ -57,10 +58,11 @@ class ofApp : public ofBaseApp
     ofxScreenSetup screenSetup;
     shared_ptr<GuiApp> gui;
     ofImage numberImages[6];
-    
+
     // serial
     vector<ofx::IO::SerialDevice> serialDevice;
-    int serialDeviceQty = 0;
+    int serialDeviceQty;
+    const int serialDeviceAssignments[3] = { 1, 3, 2 };
 
     // countdown
     bool isCountdown[3] = { false, false, false };

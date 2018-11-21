@@ -1,7 +1,6 @@
 #include "ofApp.h"
 
 //--------------------------------------------------------------
-
 void ofApp::setup()
 {
     ofBackground(255);
@@ -13,7 +12,7 @@ void ofApp::setup()
     ofSetLogLevel(OF_LOG_VERBOSE);
     ofSetDrawBitmapMode(OF_BITMAPMODE_MODEL);
     serialSetup();
-    
+
     vidGrabber[0].listDevices();
     for (int i = 0; i < 3 ; i++)
     {
@@ -28,9 +27,15 @@ void ofApp::setup()
     }
     // load images
     screenTestGrid.load("screen-test-grid.png");
-    for (int i = 0; i < 6 ; i++)
+    for (int i = 0; i < 6; i++)
     {
         numberImages[i].load("number-" + to_string(i) + ".png");
+    }
+    // sync booth mode
+    for (int k = 0; k < 3; k++)
+    {
+        if (gui->isScreenTest[k] == true) { mode[k] = "screen_test"; }
+        else { mode[k] = "photo_booth"; }
     }
 }
 
@@ -100,7 +105,7 @@ void ofApp::update()
                 ofLogNotice("ofxSerial") << str;
                 for (int k = 0; k < 3; k++)
                 {
-                    if (str == to_string(k) + "_press")
+                    if (str == to_string(serialDeviceAssignments[k]) + "_press")
                     {
                         buttonPressed(k);
                     }
@@ -119,27 +124,25 @@ void ofApp::draw()
 {
     ofBackground(0,0,0);
     ofSetColor(255,255,255);
-    
-    // photo booth -> screen test
-    if (gui->isScreenTest && mode == "photo_booth")
+
+    for (int k = 0; k < 3; k++)
     {
-        mode = "screen_test";
-        // reset all three booths
-        for (int k = 0; k < 3; k++)
+        // photo booth -> screen test
+        if (gui->isScreenTest[k] && mode[k] == "photo_booth")
         {
+            mode[k] = "screen_test";
+            // reset all three booths
             isCountdown[k] = false;
             hasShot[k] = false;
         }
-    }
-    // screen test -> photo booth
-    else if (!gui->isScreenTest && mode == "screen_test")
-    {
-        mode = "photo_booth";
-        for (int k = 0; k < 3; k++)
+        // screen test -> photo booth
+        else if (!gui->isScreenTest[k] && mode[k] == "screen_test")
         {
+            mode[k] = "photo_booth";
             isCountdown[k] = false;
         }
     }
+
     // draw and save camera / screen shot
     for (int i = 0; i < 3; i++) {
         fbo[i].draw(cameraPositions[i][0], cameraPositions[i][1]);
@@ -156,14 +159,14 @@ void ofApp::draw()
             if(y < 0 && cdScreenShotNumber[i] < screenShotQty[i])
             {
                 string path;
-                if (mode == "photo_booth")
+                if (mode[i] == "photo_booth")
                 {
                     cdNextScreenShotTime[i] += 1000/photoBoothFps;
                     screenshot[i].grabScreen(cameraPositions[i][0], cameraPositions[i][1],
                                              cameraSizes[0], cameraSizes[1]);
                     path = "audience-" + to_string(i+1) + "/" + generateScreenShotName(pressButtonTime[i], cdScreenShotNumber[i], true);
                 }
-                else if (mode == "screen_test")
+                else if (mode[i] == "screen_test")
                 {
                     cdNextScreenShotTime[i] += 1000/screenTestFps;
                     screenshot[i].grabScreen(cameraPositions[i][0]+screenTestGridDescent[i], cameraPositions[i][1],
@@ -174,7 +177,7 @@ void ofApp::draw()
                 cdScreenShotNumber[i] += 1;
             }
             // draw countdown image in photo booth mode
-            if (mode == "photo_booth")
+            if (mode[i] == "photo_booth")
             {
                 ofEnableAlphaBlending();
                 if(x >= cdTimeLength - 1000)  // draw "get ready" image
@@ -210,11 +213,10 @@ void ofApp::draw()
                 }
                 ofDisableAlphaBlending();
             }
-            else if (mode == "screen_test")
+            else if (mode[i] == "screen_test")
             {
                 if (x >= 0)
                 {
-                    cout << to_string(int(x/1000)-1) << endl;
                     screenTestStatus[i] = "Recording...";
                     // screenTestStatus[i] = "Recording... " + to_string(int(x/1000)+1) + "s left";
                 }
@@ -226,7 +228,7 @@ void ofApp::draw()
             }
         }
         // draw instructions for actors in screen test mode
-        if (mode == "screen_test")
+        if (mode[i] == "screen_test")
         {
             ofPushMatrix();
             ofTranslate(0,1080,0);
@@ -262,18 +264,19 @@ void ofApp::buttonPressed(int button)
         isCountdown[button] = true;
         pressButtonTime[button] = ofGetSystemTimeMillis();
         cdScreenShotNumber[button] = 0;
-        if (mode == "photo_booth")
+        if (mode[button] == "photo_booth")
         {
             cdEndTime[button] = ofGetElapsedTimeMillis() + cdTimeLength;
             screenShotQty[button] = photoBoothFps*5;
             cdNextScreenShotTime[button] = ofGetElapsedTimeMillis() + 1000;
             // button blinks only in photo booth mode
+
             for (int k = 0; k < serialDeviceQty; k++)
             {
-                serialDevice[k].writeBytes(to_string(button) + "_blink");
+                serialDevice[k].writeBytes(to_string(serialDeviceAssignments[button]) + "_blink");
             }
         }
-        else if (mode == "screen_test")
+        else if (mode[button] == "screen_test")
         {
             cdEndTime[button] = ofGetElapsedTimeMillis() + 3*60*1000;
             screenShotQty[button] = screenTestFps*180;  // 3m = 180s
