@@ -1,0 +1,4 @@
+ofxCv
+ofxOpenFace
+ofxOsc
+ofxSyphon
