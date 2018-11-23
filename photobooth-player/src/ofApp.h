@@ -15,29 +15,28 @@ class ofApp : public ofBaseApp
 		void update();
 		void draw();
 		void keyPressed(int key);
-    
-    void loadImages(ofDirectory& dir, vector<ofImage>& img, string name);
 
-    string mode = "none";
+    bool loadImagesDir(vector<string>& dir, string name);
+    void loadAudienceImages();
+    void playAudienceImages();
     
+    inline string exec(const char* cmd);
+    inline vector<string> split(const string& str, const string& delim);
+    
+    string mode = "none";
+
     ofxOscReceiver oscReceiver;
     ofxSyphonServer syphonServer;
+    ofxSyphonServer syphonAudience[3];
     
-    ofxThreadedImageLoader threadedImageloader1;
-    ofxThreadedImageLoader threadedImageloader2;
-    ofxThreadedImageLoader threadedImageloader3;
+    ofxThreadedImageLoader threadedImageloader[3];
     
-    ofDirectory dirJackie;
-    ofDirectory dirLiz;
-    ofDirectory dirMarilyn;
-    
-    vector<ofImage> imgJackie;
-    vector<ofImage> imgLiz;
-    vector<ofImage> imgMarilyn;
-    
-    bool hasLoadedJackie = false;
-    bool hasLoadedLiz = false;
-    bool hasLoadedMarilyn = false;
-    
+    vector<string> dirJackie, dirLiz, dirMarilyn;
     int currentImage = 0;
+
+    vector<string> dirAudience[3];
+    vector<ofImage> imgAudience[3];
+    bool hasLoadedAudience = false;
+    string imgAudienceDirName[3] = { "audience-1", "audience-2", "audience-3" };
+    int currentImageAudience[3][15];
 };
