@@ -11,7 +11,7 @@ void ofApp::setup()
     }
     ofSetLogLevel(OF_LOG_VERBOSE);
     ofSetDrawBitmapMode(OF_BITMAPMODE_MODEL);
-    serialSetup();
+    buttonSetup();
 
     vidGrabber[0].listDevices();
     for (int i = 0; i < 3 ; i++)
@@ -40,13 +40,13 @@ void ofApp::setup()
 }
 
 //--------------------------------------------------------------
-void ofApp::serialSetup()
+void ofApp::buttonSetup()
 {
+    serialDevice.clear();
     std::vector<ofx::IO::SerialDeviceInfo> devicesInfo = ofx::IO::SerialDeviceUtils::listDevices();
     if (!devicesInfo.empty())
     {
         serialDeviceQty = devicesInfo.size();
-        cout << serialDeviceQty << endl;
         // allocate the vector to have as many SerialDevice as devicesInfo
         serialDevice.assign(serialDeviceQty, ofx::IO::SerialDevice());
         // connection info
@@ -77,7 +77,7 @@ void ofApp::update()
     for(int i = 0; i < 3 ; i++)
     {
         // press button event from gui
-        if(gui->isVirtualButtonPressed[i])
+        if (gui->isVirtualButtonPressed[i])
         {
             buttonPressed(i);
             gui->isVirtualButtonPressed[i] = false;
@@ -88,6 +88,12 @@ void ofApp::update()
         vidGrabber[i].draw( fboPositions[i][0], fboPositions[i][1],
                            -fboSizes[i][0],     fboSizes[i][1]);
         fbo[i].end();
+    }
+    // press reset button event
+    if (gui->isButtonReseted)
+    {
+        buttonSetup();
+        gui->isButtonReseted = false;
     }
     // receive serial command from arduino
     try
@@ -272,7 +278,6 @@ void ofApp::buttonPressed(int button)
             screenShotQty[button] = photoBoothFps*5;
             cdNextScreenShotTime[button] = ofGetElapsedTimeMillis() + 1000;
             // button blinks only in photo booth mode
-
             for (int k = 0; k < serialDeviceQty; k++)
             {
                 serialDevice[k].writeBytes(to_string(serialDeviceAssignments[button]) + "_blink");

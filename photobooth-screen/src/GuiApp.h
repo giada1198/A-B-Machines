@@ -17,6 +17,7 @@ class GuiApp: public ofBaseApp
     void button1Pressed();
     void button2Pressed();
     void button3Pressed();
+    void resetButtonPressed();
 
     ofxOscReceiver oscReceiver;
 
@@ -25,5 +26,7 @@ class GuiApp: public ofBaseApp
     ofParameter<bool> isScreenTest[3];
 
     ofxButton button[3];
+    ofxButton resetButton;
     ofParameter<bool> isVirtualButtonPressed[3];
+    ofParameter<bool> isButtonReseted;
 };

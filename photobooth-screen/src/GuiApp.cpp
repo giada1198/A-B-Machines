@@ -8,9 +8,6 @@ void GuiApp::setup()
     button[2].addListener(this, &GuiApp::button3Pressed);
 
 	parameters.setName("A/B Machines");
-    // parameters.add(performance.set("Performance:",1,1,8));
-    // parameters.add(performanceLabel.set(sessions[0]));
-    // parameters.add(isScreenTest.set("Screen Test", false));
     for (int i = 0; i < 3; i++)
     {
         parameters.add(isScreenTest[i].set("Screen Test Booth " + to_string(i+1), false));
@@ -19,6 +16,7 @@ void GuiApp::setup()
     gui.add(button[0].setup("Button 1 Jackie"));
     gui.add(button[1].setup("Button 2 Liz"));
     gui.add(button[2].setup("Button 3 Marilyn"));
+    gui.add(resetButton.setup("Reset Buttons"))
 
     // listen on the given port
     ofLog() << "listening for osc messages on port " << PORT;
@@ -37,13 +35,23 @@ void GuiApp::update()
         // get the next message
         ofxOscMessage m;
         oscReceiver.getNextMessage(m);
-        if (m.getAddress() == "/photobooth")
+        if (m.getAddress() == "/booth")
         {
             string s = m.getArgAsString(0);
             for (int i = 0; i > 3; i++)
             {
-                if (s == (to_string(i) + "_photobooth") && isScreenTest[i]) { isScreenTest[i] = false; }
-                else if (s == (to_string(i) + "_screentest") && !isScreenTest[i]) { isScreenTest[i] = true; }
+                if (s == (to_string(i+1) + "_photobooth") && isScreenTest[i])
+                {
+                    isScreenTest[i].set(false);
+                }
+                else if (s == (to_string(i+1) + "_screentest") && !isScreenTest[i])
+                {
+                    isScreenTest[i].set(true);
+                }
+                else if (s == "reset")
+                {
+                    isButtonReseted.set(true);
+                }
             }
         }
     }
@@ -59,3 +67,4 @@ void GuiApp::draw()
 void GuiApp::button1Pressed() { isVirtualButtonPressed[0].set(true); }
 void GuiApp::button2Pressed() { isVirtualButtonPressed[1].set(true); }
 void GuiApp::button3Pressed() { isVirtualButtonPressed[2].set(true); }
+void GuiApp::resetButtonPressed() { isButtonReseted.set(true); }

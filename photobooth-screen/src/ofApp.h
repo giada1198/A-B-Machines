@@ -11,14 +11,16 @@ class ofApp : public ofBaseApp
 		void setup();
 		void update();
 		void draw();
-        void exit();
+		void exit();
 
-        void serialSetup();
-        void photoSetup();
+	void buttonSetup();
+    void buttonPressed(int button);
+    static void virtualButtonPressed();
+    string generateScreenShotName(int time, int number, bool isPhotoBooth);
 
-        void buttonPressed(int button);
-        static void virtualButtonPressed();
-        string generateScreenShotName(int time, int number, bool isPhotoBooth);
+	// Camera & Button Assignment
+	const int cameraAssignments[3] = { 0, 2, 3 };
+	const int serialDeviceAssignments[3] = { 5, 2, 3 };
 
     // basic setup
     const int fps = 24;
@@ -31,9 +33,8 @@ class ofApp : public ofBaseApp
     // camera
     const int cameraSizes[2] = { 960, 540 };
     const int cameraPositions[4][2] = { {0,0},{960,0},{0,540},{960,540} };
-    const int cameraAssignments[3] = { 0, 2, 3 };
 
-    // screen shot
+    // video grabber
     ofVideoGrabber vidGrabber[3];
     ofImage screenshot[3];
     bool hasShot[3] = { false, false, false };
@@ -62,7 +63,6 @@ class ofApp : public ofBaseApp
     // serial
     vector<ofx::IO::SerialDevice> serialDevice;
     int serialDeviceQty;
-    const int serialDeviceAssignments[3] = { 5, 2, 3 };
 
     // countdown
     bool isCountdown[3] = { false, false, false };
