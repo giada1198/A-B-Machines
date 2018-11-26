@@ -31,6 +31,10 @@ void ofApp::setup()
     {
         numberImages[i].load("number-" + to_string(i) + ".png");
     }
+    for (int j = 0; j < 2; j++)
+    {
+        instagramLayer[i].load("layer-" + to_string(j) + ".png");
+    }
     // sync booth mode
     for (int k = 0; k < 3; k++)
     {
@@ -206,6 +210,27 @@ void ofApp::draw()
                                                  cameraSizes[0], cameraSizes[1]);
                         string path = "copy/instagram/" + generateScreenShotName(pressButtonTime[i], 30, true);
                         screenshot[i].save(path);
+
+                        ofFbo fbo;
+                        fbo.allocate(500,500);
+                        fbo.begin();
+                        ofClear(0,0,0,0);
+                        instagramLayer[0].draw(0,0,500,500);
+                        ofPushMatrix();
+                        ofTranslate(500,0,0);
+                        ofRotate(90,0,0,1);
+                        screenshot[i].draw(0,109,500,282);
+                        ofPopMatrix();
+                        instagramLayer[1].draw(0,0,500,500);
+                        fbo.end();
+
+                        ofPixels pixels;
+                        pixels.clear();
+                        fbo.readToPixels(pixels);
+
+                        path = "copy/instagram/frame_" + generateScreenShotName(pressButtonTime[i], 30, true);
+                        ofSaveImage(pixels, path, OF_IMAGE_QUALITY_BEST);
+
                         hasShot[i] = true;
                     }
                     ofSetColor(255,255,255,(int(255*(1-abs(500-x)/500))));

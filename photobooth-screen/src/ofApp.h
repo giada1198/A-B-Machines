@@ -72,4 +72,7 @@ class ofApp : public ofBaseApp
     float pressButtonTime[3];
     float cdNextScreenShotTime[3];
     int cdScreenShotNumber[3];
+
+	// instagram
+	ofImage instagramLayer[2];
 };
