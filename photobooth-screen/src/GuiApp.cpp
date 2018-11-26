@@ -6,6 +6,7 @@ void GuiApp::setup()
     button[0].addListener(this, &GuiApp::button1Pressed);
     button[1].addListener(this, &GuiApp::button2Pressed);
     button[2].addListener(this, &GuiApp::button3Pressed);
+    resetButton.addListener(this, &GuiApp::resetButtonPressed);
 
 	parameters.setName("A/B Machines");
     for (int i = 0; i < 3; i++)
@@ -16,7 +17,7 @@ void GuiApp::setup()
     gui.add(button[0].setup("Button 1 Jackie"));
     gui.add(button[1].setup("Button 2 Liz"));
     gui.add(button[2].setup("Button 3 Marilyn"));
-    gui.add(resetButton.setup("Reset Buttons"))
+    gui.add(resetButton.setup("Reset Buttons"));
 
     // listen on the given port
     ofLog() << "listening for osc messages on port " << PORT;
@@ -38,15 +39,19 @@ void GuiApp::update()
         if (m.getAddress() == "/booth")
         {
             string s = m.getArgAsString(0);
-            for (int i = 0; i > 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 if (s == (to_string(i+1) + "_photobooth") && isScreenTest[i])
                 {
-                    isScreenTest[i].set(false);
+                    isScreenTest[i] = false;
+                }
+                else if (s == "all_photobooth" && isScreenTest[i])
+                {
+                    isScreenTest[i] = false;
                 }
                 else if (s == (to_string(i+1) + "_screentest") && !isScreenTest[i])
                 {
-                    isScreenTest[i].set(true);
+                    isScreenTest[i] = true;
                 }
                 else if (s == "reset")
                 {

@@ -33,7 +33,7 @@ void ofApp::setup()
     }
     for (int j = 0; j < 2; j++)
     {
-        instagramLayer[i].load("layer-" + to_string(j) + ".png");
+        instagramLayer[j].load("layer-" + to_string(j) + ".png");
     }
     // sync booth mode
     for (int k = 0; k < 3; k++)
@@ -97,6 +97,7 @@ void ofApp::update()
     if (gui->isButtonReseted)
     {
         buttonSetup();
+        cout << "reset!" << endl;
         gui->isButtonReseted = false;
     }
     // receive serial command from arduino
@@ -118,6 +119,7 @@ void ofApp::update()
                 {
                     if (str == to_string(serialDeviceAssignments[k]) + "_press")
                     {
+                        cout << "lol" << endl;
                         buttonPressed(k);
                     }
                 }
