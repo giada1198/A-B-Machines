@@ -20,7 +20,7 @@ class ofApp : public ofBaseApp
 
 	// Camera & Button Assignment
 	const int cameraAssignments[3] = { 0, 2, 3 };
-	const int serialDeviceAssignments[3] = { 5, 2, 3 };
+	const int serialDeviceAssignments[3] = { 5, 4, 3 };
 
     // basic setup
     const int fps = 24;

@@ -40,6 +40,7 @@ void ofApp::setup()
     {
         if (gui->isScreenTest[k] == true) { mode[k] = "screen_test"; }
         else { mode[k] = "photo_booth"; }
+        cdEndTime[k] = ofGetElapsedTimeMillis();
     }
 }
 
@@ -119,7 +120,6 @@ void ofApp::update()
                 {
                     if (str == to_string(serialDeviceAssignments[k]) + "_press")
                     {
-                        cout << "lol" << endl;
                         buttonPressed(k);
                     }
                 }
@@ -157,14 +157,18 @@ void ofApp::draw()
     }
 
     // draw and save camera / screen shot
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++)
+    {
         fbo[i].draw(cameraPositions[i][0], cameraPositions[i][1]);
         if(hasShot[i] && isCountdown[i])
         {
             screenshot[i].draw(cameraPositions[i][0], cameraPositions[i][1]);
         }
+        //
+        
+        
         // draw countdown image
-        if(isCountdown[i])
+        if (isCountdown[i])
         {
             float x = cdEndTime[i] - ofGetElapsedTimeMillis();  // time remaining on record
             float y = cdNextScreenShotTime[i] - ofGetElapsedTimeMillis();  // time remaining to the next shot
@@ -232,7 +236,7 @@ void ofApp::draw()
 
                         path = "copy/instagram/frame_" + generateScreenShotName(pressButtonTime[i], 30, true);
                         ofSaveImage(pixels, path, OF_IMAGE_QUALITY_BEST);
-
+                        
                         hasShot[i] = true;
                     }
                     ofSetColor(255,255,255,(int(255*(1-abs(500-x)/500))));
@@ -245,6 +249,7 @@ void ofApp::draw()
                 {
                     isCountdown[i] = false;
                     hasShot[i] = false;
+                    vidGrabber[i].initGrabber(cameraSizes[0],cameraSizes[1]);
                 }
                 ofDisableAlphaBlending();
             }
@@ -261,6 +266,19 @@ void ofApp::draw()
                     screenTestStatus[i] = "Standby";
                 }
             }
+        }
+        else if (((ofGetElapsedTimeMillis() - cdEndTime[i]) > 30000) && mode[i] != "screen_test")
+        {
+            cout << "reactivate!" << endl;
+            for (int k = 0; k < 3; k++)
+            {
+                if (!isCountdown[k])
+                {
+                    cdEndTime[k] = ofGetElapsedTimeMillis();
+                }
+            }
+            vidGrabber[i].initGrabber(cameraSizes[0],cameraSizes[1]);
+            buttonSetup();
         }
         // draw instructions for actors in screen test mode
         if (mode[i] == "screen_test")
@@ -283,6 +301,7 @@ void ofApp::draw()
                                 screenTestGridSize[0]-10, screenTestGridSize[1]-10);
             ofPopMatrix();
         }
+
     }
 }
 
@@ -312,10 +331,9 @@ void ofApp::buttonPressed(int button)
         }
         else if (mode[button] == "screen_test")
         {
-            cdEndTime[button] = ofGetElapsedTimeMillis() + 3*60*1000;
-            screenShotQty[button] = screenTestFps*180;  // 3m = 180s
+            cdEndTime[button] = ofGetElapsedTimeMillis() + 1.5*60*1000;
+            screenShotQty[button] = screenTestFps*90;  // 1.5m = 90s
             cdNextScreenShotTime[button] = ofGetElapsedTimeMillis();
-            cout << "press!" << endl;
         }
     }
 }
