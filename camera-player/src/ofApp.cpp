@@ -21,9 +21,9 @@ void ofApp::setup()
     mClient.setApplicationName("Black Syphon");
     mClient.setServerName("");
     
-    oft.lock();
-    oft.unlock();
-    oft.startThread(true); // start the OpenFace thread
+    // oft.lock();
+    // oft.unlock();
+    // oft.startThread(true); // start the OpenFace thread
 }
 
 //--------------------------------------------------------------
@@ -42,14 +42,14 @@ void ofApp::update()
                 mode = "camera";
                 ofSetFrameRate(24);
             }
-            else if (s == "lipsync" && mode != "lip_sync")
-            {
-                oft.lock();
-                oft.openFace.reset();
-                oft.unlock();
-                mode = "lip_sync";
-                ofSetFrameRate(12);
-            }
+//            else if (s == "lipsync" && mode != "lip_sync")
+//            {
+//                 oft.lock();
+//                 oft.openFace.reset();
+//                 oft.unlock();
+//                 mode = "lip_sync";
+//                 ofSetFrameRate(12);
+//            }
             else if (s == "audience" && mode != "audience")
             {
                 mode = "audience";
@@ -63,7 +63,7 @@ void ofApp::update()
 //--------------------------------------------------------------
 void ofApp::exit()
 {
-    oft.stopThread();
+    // oft.stopThread();
 }
 
 //--------------------------------------------------------------
@@ -99,86 +99,86 @@ void ofApp::draw()
             ofPopMatrix();
         }
     }
-    else if (mode == "lip_sync")
-    {
-        if (isOpenFaceFirstRun)
-        {
-            mode = "camera";
-            isOpenFaceFirstRun = false;
-        }
-        fbo1.begin();
-        mClient.draw(-20,-30);
-        fbo1.end();
-        fbo2.begin();
-        mClient.draw(-365,-30);
-        fbo2.end();
-        fbo3.begin();
-        mClient.draw(-20,-271);
-        fbo3.end();
-        
-        fboLips.begin();
-        fbo1.draw(0,0,330,187);
-        fbo2.draw(330,0,330,187);
-        fbo3.draw(0,187,330,187);
-        fboLips.end();
-        
-        oft.lock();
-        ofPixels pixs;
-        fboLips.readToPixels(pixs);
-        oft.pixels = pixs;
-
-        for (int i = 0; i < oft.openFace.faces.size(); i++)
-        {
-            if (oft.openFace.faces[i].active)
-            {
-                int x0 = (oft.openFace.faces[i].getLandmark(48))[0];
-                int y0 = (oft.openFace.faces[i].getLandmark(48))[1];
-                int x1 = y0;
-                int y1 = y0;
-                for (int j=49; j<60; j++)
-                {
-                    int xn = (oft.openFace.faces[i].getLandmark(j))[0];
-                    int yn = (oft.openFace.faces[i].getLandmark(j))[1];
-                    if (xn < x0) { x0 = xn; }
-                    if (yn < y0) { y0 = yn; }
-                    if (xn > x1) { x1 = xn; }
-                    if (yn > y1) { y1 = yn; }
-                }
-                int w = abs(x1-x0);
-                int h = abs(y1-y0);
-                if (w > 0)
-                {
-                    ofFbo lip;
-                    lip.allocate(w, h, GL_RGB);
-                    lip.begin();
-                    fboLips.draw(-abs(x0), -abs(y0), 660, 374);
-                    lip.end();
-                    int cx = abs(x0+w/2);
-                    int cy = abs(y0+h/2);
-                    int x2, y2;
-                    if (cx < 330 && cy < 187)
-                    {
-                        x2 = 240-w*2;
-                        y2 = 135-h*2;
-                        lip.draw(x2, y2, w*4, h*4);
-                    }
-                    else if (cx > 330 && cy < 187)
-                    {
-                        x2 = 480+240-w*2;
-                        y2 = 135-h*2;
-                        lip.draw(x2, y2, w*4, h*4);
-                    }
-                    else if (cx < 330 && cy > 187)
-                    {
-                        x2 = 240-w*2;
-                        y2 = 270+135-h*2;
-                        lip.draw(x2, y2, w*4, h*4);
-                    }
-                }
-            }
-        }
-        oft.unlock();
-    }
+//    else if (mode == "lip_sync")
+//    {
+//        if (isOpenFaceFirstRun)
+//        {
+//            mode = "camera";
+//            isOpenFaceFirstRun = false;
+//        }
+//        fbo1.begin();
+//        mClient.draw(-20,-30);
+//        fbo1.end();
+//        fbo2.begin();
+//        mClient.draw(-365,-30);
+//        fbo2.end();
+//        fbo3.begin();
+//        mClient.draw(-20,-271);
+//        fbo3.end();
+//
+//        fboLips.begin();
+//        fbo1.draw(0,0,330,187);
+//        fbo2.draw(330,0,330,187);
+//        fbo3.draw(330,187,330,187);
+//        fboLips.end();
+//
+//        oft.lock();
+//        ofPixels pixs;
+//        fboLips.readToPixels(pixs);
+//        oft.pixels = pixs;
+//
+//        for (int i = 0; i < oft.openFace.faces.size(); i++)
+//        {
+//            if (oft.openFace.faces[i].active)
+//            {
+//                int x0 = (oft.openFace.faces[i].getLandmark(48))[0];
+//                int y0 = (oft.openFace.faces[i].getLandmark(48))[1];
+//                int x1 = y0;
+//                int y1 = y0;
+//                for (int j=49; j<60; j++)
+//                {
+//                    int xn = (oft.openFace.faces[i].getLandmark(j))[0];
+//                    int yn = (oft.openFace.faces[i].getLandmark(j))[1];
+//                    if (xn < x0) { x0 = xn; }
+//                    if (yn < y0) { y0 = yn; }
+//                    if (xn > x1) { x1 = xn; }
+//                    if (yn > y1) { y1 = yn; }
+//                }
+//                int w = abs(x0-x1);
+//                int h = abs(y0-y1);
+//                if (w > 0)
+//                {
+//                    ofFbo lip;
+//                    lip.allocate(w, h, GL_RGB);
+//                    lip.begin();
+//                    fboLips.draw(-x0, -y0, 660, 374);
+//                    lip.end();
+//                    int cx = x0+w/2;
+//                    int cy = y0+h/2;
+//                    int x2, y2;
+//                    if (cx < 330 && cy < 187)
+//                    {
+//                        x2 = 240-w*2;
+//                        y2 = 135-h*2;
+//                        lip.draw(x2, y2, w*4, h*4);
+//                    }
+//                    else if (cx > 330 && cy < 187)
+//                    {
+//                        x2 = 480+240-w*2;
+//                        y2 = 135-h*2;
+//                        lip.draw(x2, y2, w*4, h*4);
+//                    }
+//                    else
+//                    {
+//                        x2 = 240-w*2;
+//                        y2 = 270+135-h*2;
+//                        lip.draw(x2, y2, w*4, h*4);
+//                    }
+//                }
+//            }
+//        }
+//        oft.unlock();
+//    }
     else if (mode == "camera")
     {
         ofSetColor(255);
@@ -207,14 +207,14 @@ void ofApp::keyPressed(int key)
         mode = "camera";
         ofSetFrameRate(24);
     }
-    else if (key == '2' && mode != "lip_sync")
-    {
-        oft.lock();
-        oft.openFace.reset();
-        oft.unlock();
-        mode = "lip_sync";
-        ofSetFrameRate(12);
-    }
+//    else if (key == '2' && mode != "lip_sync")
+//    {
+//        oft.lock();
+//        oft.openFace.reset();
+//        oft.unlock();
+//        mode = "lip_sync";
+//        ofSetFrameRate(12);
+//    }
     else if (key == '3' && mode != "audience")
     {
         mode = "audience";
