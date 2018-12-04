@@ -154,17 +154,19 @@ class Window(Frame):
 
 def printOSC(unused_addr, args, cue):
     try:
-        if not app.isRandom:
-            if int(cue) > 900:
-                app.freq = int(cue)-900
-                app.isRandom = True
-                randomThread = threading.Thread(target=random)
-                randomThread.start()
-            else:
-                app.gotoCueNumber.set(cue)
-                app.gotoCue()
-        elif int(cue) == 999:
-            app.isRandom = False
+        app.gotoCueNumber.set(cue)
+        app.gotoCue()
+        # if not app.isRandom:
+        #     if int(cue) > 900:
+        #         app.freq = int(cue)-900
+        #         app.isRandom = True
+        #         randomThread = threading.Thread(target=random)
+        #         randomThread.start()
+        #     else:
+        #         app.gotoCueNumber.set(cue)
+        #         app.gotoCue()
+        # elif int(cue) == 999:
+        #     app.isRandom = False
     except:
         pass
     print("[osc   ] {0} {1}".format(args[0], cue))
@@ -178,6 +180,7 @@ def random():
                 app.matrix.write(tstr.encode('UTF-8'))
             print('[serial][random] ' + tstr)
         time.sleep(app.freq*0.1)
+
 # def nothing():
 #     pass
 
