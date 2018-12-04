@@ -3,7 +3,7 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     ofSetWindowTitle("A/B Machines Media Player");
-    ofSetFrameRate(12); // run at 12 fps
+    ofSetFrameRate(6); // run at 12 fps
     ofSetVerticalSync(true);
 
     // listen on the given port
@@ -29,20 +29,24 @@ void ofApp::update()
             if (s == "jackie" && loadImagesDir(dirJackie, "Jackie"))
             {
                 mode = "jackie";
+                ofSetFrameRate(6);
                 currentImage = 0;
             }
             else if (s == "liz" && loadImagesDir(dirLiz, "Liz"))
             {
                 mode = "liz";
+                ofSetFrameRate(6);
                 currentImage = 0;
             }
             else if (s == "marilyn" && loadImagesDir(dirMarilyn, "Marilyn"))
             {
                 mode = "marilyn";
+                ofSetFrameRate(6);
                 currentImage = 0;
             }
             else if (s == "audience" && hasLoadedAudience)
             {
+                ofSetFrameRate(12);
                 playAudienceImages();
             }
             else if (s == "load")
@@ -98,7 +102,7 @@ void ofApp::draw()
         else if (mode == "marilyn" && dirMarilyn.size()>0)
         {
             ofImage img;
-            img.load("../../../data/copy/Marilyn/" + dirMarilyn[currentImage]);
+            img.load("../../../data/Marilyn/" + dirMarilyn[currentImage]);
             img.draw(0,0,600,735);
             currentImage++;
             currentImage %= dirMarilyn.size();
@@ -117,19 +121,26 @@ void ofApp::keyPressed(int key)
     if (key == '1' && loadImagesDir(dirJackie, "Jackie"))
     {
         mode = "jackie";
+        ofSetFrameRate(6);
         currentImage = 0;
     }
     else if (key == '2' && loadImagesDir(dirLiz, "Liz"))
     {
         mode = "liz";
+        ofSetFrameRate(6);
         currentImage = 0;
     }
     else if (key == '3' && loadImagesDir(dirMarilyn, "Marilyn"))
     {
-            mode = "marilyn";
-            currentImage = 0;
+        mode = "marilyn";
+        ofSetFrameRate(6);
+        currentImage = 0;
     }
-    else if (key == '4' && hasLoadedAudience) { playAudienceImages(); }
+    else if (key == '4' && hasLoadedAudience)
+    {
+        ofSetFrameRate(12);
+        playAudienceImages();
+    }
     else if (key == 'l') { loadAudienceImages(); }
     else if (key == '0') { mode = "none"; }
 }
@@ -138,7 +149,15 @@ void ofApp::keyPressed(int key)
 bool ofApp::loadImagesDir(vector<string>& dir, string name)
 {
     dir.clear();
-    string datafolder = "../../../data/copy/" + name + "/";
+    string datafolder;
+    if (name == "Marilyn")
+    {
+        datafolder = "../../../data/" + name + "/";
+    }
+    else
+    {
+        datafolder = "../../../data/copy/" + name + "/";
+    }
     dir = split( exec(("cd " + datafolder + "; ls").c_str()), "\n" );
     return dir.size()>0;
 }
