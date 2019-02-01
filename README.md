@@ -1,8 +1,8 @@
-![header](/img/header_andy.jpg)
-
 # A/B Machines
 
-An immersive theater project that explores people chasing American dream and their self-identity, inspired by Andy Warhol and his philosophy.
+![head](/img/head.jpg)
+
+A/B Machines is an experimental theatrical experience where people explore their dream, identity and basic human impulse to see and be seen using cameras and selfie machines. The script was adapted from the works of Andy Warhol and inspired by his philosophy.
 
 ## Folder Structure
 
