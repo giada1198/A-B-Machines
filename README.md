@@ -1,6 +1,6 @@
 # A/B Machines
 
-![head](/img/head.jpg)
+![header](/img/header.jpg)
 
 A/B Machines is an experimental theatrical experience where people explore their dream, identity and basic human impulse to see and be seen using cameras and selfie machines. The script was adapted from the works of Andy Warhol and inspired by his philosophy.
 
